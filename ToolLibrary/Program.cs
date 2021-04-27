@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assessment1_ToolLibrary
+namespace CAB301_ToolLibrarySystem
 {
     class Program
     {

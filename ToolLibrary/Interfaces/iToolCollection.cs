@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Assessment1_ToolLibrary
+namespace CAB301_ToolLibrarySystem
 {
     /// <summary>
     /// The specification of ToolCollection ADT, which is used to store and manipulate a collection of tools

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
 
-namespace Assessment1_ToolLibrary
+namespace CAB301_ToolLibrarySystem
 {
     public static class ToolTypes
     {
