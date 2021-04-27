@@ -6,4 +6,8 @@
     <RootNamespace>Assessment1_ToolLibrary</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="ToolLibrary\DataTypes\" />
+  </ItemGroup>
+
 </Project>
