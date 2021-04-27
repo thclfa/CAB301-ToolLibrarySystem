@@ -6,28 +6,41 @@ namespace Assessment1_ToolLibrary
 {
     class ToolCollection : iToolCollection
     {
-        Tool[] Tools = new Tool[1];
+        iTool[] Tools = new iTool[0];
 
         public int Number => Tools.Length;
 
         public void add(iTool aTool)
         {
             Array.Resize(ref Tools, Number + 1);
+            Tools[Number] = (Tool)aTool;
         }
 
         public void delete(iTool aTool)
         {
-            throw new NotImplementedException();
+            int i = Array.IndexOf(Tools, aTool);
+            if (i == -1)
+                return;
+
+            // Remove item
+            Tools[i] = null;
+
+            // Shift every item up
+            for (; i < Number; i++)
+                Tools[i] = Tools[i + 1];
+
+            // Resize array to reflect new size
+            Array.Resize(ref Tools, Number - 1);
         }
 
         public bool search(iTool aTool)
         {
-            throw new NotImplementedException();
+            return Array.IndexOf(Tools, aTool) > -1;
         }
 
         public iTool[] toArray()
         {
-            throw new NotImplementedException();
+            return Tools;
         }
     }
 }

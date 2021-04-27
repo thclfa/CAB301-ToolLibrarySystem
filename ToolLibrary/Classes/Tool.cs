@@ -6,14 +6,16 @@ namespace Assessment1_ToolLibrary
 {
     class Tool : iTool
     {
-        public Tool(string name, int quantity)
+        public Tool(string name, int quantity, ToolType type)
         {
             this.Name = name;
             this.Quantity = quantity;
+            this.ToolType = type;
             this.AvailableQuantity = quantity;
             this.NoBorrowings = 0;
         }
 
+        public ToolType ToolType { get; private set; }
         public string Name { get; set; }
         public int Quantity { get; set; }
         public int AvailableQuantity { get; set; }
@@ -23,6 +25,7 @@ namespace Assessment1_ToolLibrary
 
         public void addBorrower(iMember aMember)
         {
+            NoBorrowings++;
             throw new NotImplementedException();
         }
 
