@@ -6,17 +6,17 @@ namespace CAB301_ToolLibrarySystem
 {
     class ToolCollection : iToolCollection
     {
-        iTool[] Tools = new iTool[0];
+        Tool[] Tools = new Tool[0];
 
-        public int Number => Tools.Length;
+        public int Number => Array.FindAll(Tools, t => t != null).Length;
 
-        public void add(iTool aTool)
+        public void add(Tool aTool)
         {
-            Array.Resize(ref Tools, Number + 1);
-            Tools[Number] = (Tool)aTool;
+            Tools[Number] = aTool;
+            Array.Resize(ref Tools, Number + 1); // Resize to add empty entry
         }
 
-        public void delete(iTool aTool)
+        public void delete(Tool aTool)
         {
             int i = Array.IndexOf(Tools, aTool);
             if (i == -1)
@@ -29,16 +29,15 @@ namespace CAB301_ToolLibrarySystem
             for (; i < Number; i++)
                 Tools[i] = Tools[i + 1];
 
-            // Resize array to reflect new size
-            Array.Resize(ref Tools, Number - 1);
+            Array.Resize(ref Tools, Number - 1); // Resize to remove empty entry
         }
 
-        public bool search(iTool aTool)
+        public bool search(Tool aTool)
         {
             return Array.IndexOf(Tools, aTool) > -1;
         }
 
-        public iTool[] toArray()
+        public Tool[] toArray()
         {
             return Tools;
         }

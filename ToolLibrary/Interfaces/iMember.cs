@@ -5,7 +5,7 @@ using System.Text;
 namespace CAB301_ToolLibrarySystem
 {
     //The specification of Member ADT
-    interface iMember
+    interface iMember : IComparable
     {
         /// <summary>
         /// Get and Set the first name of this member
@@ -55,13 +55,13 @@ namespace CAB301_ToolLibrarySystem
         /// Add a given tool to the list of tools that this member is currently holding
         /// </summary>
         /// <param name="aTool">Tool to be added</param>
-        void addTool(iTool aTool);
+        void addTool(Tool aTool);
 
         /// <summary>
         /// Delete a given tool from the list of tools that this member is currently holding
         /// </summary>
         /// <param name="aTool">Tool to be deleted</param>
-        void deleteTool(iTool aTool);
+        void deleteTool(Tool aTool);
 
         /// <summary>
         /// Return a string containing the first name, lastname, and contact phone number of this memeber

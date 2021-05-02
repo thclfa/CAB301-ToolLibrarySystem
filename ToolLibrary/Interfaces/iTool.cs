@@ -56,13 +56,13 @@ namespace CAB301_ToolLibrarySystem
         /// Add a member to the borrower list
         /// </summary>
         /// <param name="aMember">A User within the ToolLibrarySystem</param>
-        void addBorrower(iMember aMember);
+        void addBorrower(Member aMember);
 
         /// <summary>
         /// Delte a member from the borrower list
         /// </summary>
         /// <param name="aMember">A User within the ToolLibrarySystem</param>
-        void deleteBorrower(iMember aMember);
+        void deleteBorrower(Member aMember);
 
         /// <summary>
         /// Return a string containning the name and the available quantity of this tool 

@@ -6,16 +6,14 @@ namespace CAB301_ToolLibrarySystem
 {
     class Tool : iTool
     {
-        public Tool(string name, int quantity, ToolType type)
+        public Tool(string name, int quantity)
         {
             this.Name = name;
             this.Quantity = quantity;
-            this.ToolType = type;
             this.AvailableQuantity = quantity;
             this.NoBorrowings = 0;
         }
 
-        public ToolType ToolType { get; private set; }
         public string Name { get; set; }
         public int Quantity { get; set; }
         public int AvailableQuantity { get; set; }
@@ -23,20 +21,20 @@ namespace CAB301_ToolLibrarySystem
 
         public iMemberCollection GetBorrowers => throw new NotImplementedException();
 
-        public void addBorrower(iMember aMember)
+        public void addBorrower(Member aMember)
         {
             NoBorrowings++;
             throw new NotImplementedException();
         }
 
-        public void deleteBorrower(iMember aMember)
+        public void deleteBorrower(Member aMember)
         {
             throw new NotImplementedException();
         }
 
         public override string ToString()
         {
-            return Name;
+            return Name.Split('/')[2];
         }
     }
 }
