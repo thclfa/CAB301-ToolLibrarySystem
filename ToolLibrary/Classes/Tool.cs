@@ -1,40 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CAB301_ToolLibrarySystem
 {
-    class Tool : iTool
+    public class Tool : iTool, IComparable<Tool>
     {
+        private MemberCollection members;
+        private string name;
+        private int quantity;
+        private int availableQuantity;
+        private int noBorrowings;
+
         public Tool(string name, int quantity)
         {
-            this.Name = name;
-            this.Quantity = quantity;
-            this.AvailableQuantity = quantity;
-            this.NoBorrowings = 0;
+            this.name = name;
+            this.quantity = quantity;
+            this.availableQuantity = quantity;
+            this.noBorrowings = 0;
+            this.members = new MemberCollection();
         }
 
-        public string Name { get; set; }
-        public int Quantity { get; set; }
-        public int AvailableQuantity { get; set; }
-        public int NoBorrowings { get; set; }
+        public string Name { get => name; set => name = value; }
+        public int Quantity { get => quantity; set => quantity = value; }
+        public int AvailableQuantity { get => availableQuantity; set => availableQuantity = value; }
+        public int NoBorrowings { get => noBorrowings; set => noBorrowings = value; }
 
-        public iMemberCollection GetBorrowers => throw new NotImplementedException();
+        public MemberCollection GetBorrowers => members;
 
         public void addBorrower(Member aMember)
         {
+            if (AvailableQuantity <= 0)
+                return;
+
+            members.add(aMember);
+            AvailableQuantity--;
             NoBorrowings++;
-            throw new NotImplementedException();
         }
 
         public void deleteBorrower(Member aMember)
         {
-            throw new NotImplementedException();
+            if (!members.search(aMember))
+                return;
+
+            members.delete(aMember);
+            AvailableQuantity++;
         }
 
         public override string ToString()
         {
-            return Name.Split('/')[2];
+            return string.Format("{0}{1}{2}", 
+                Name.PadRight(40), 
+                AvailableQuantity.ToString().PadSides(10), 
+                Quantity.ToString().PadSides(10));
+        }
+
+        public int CompareTo(Tool other)
+        {
+            return Name.CompareTo(other.Name);
         }
     }
 }

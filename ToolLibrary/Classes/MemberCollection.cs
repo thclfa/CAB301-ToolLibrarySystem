@@ -5,43 +5,26 @@ using System.Linq;
 
 namespace CAB301_ToolLibrarySystem
 {
-    class MemberCollection : iMemberCollection
+    public class MemberCollection : iMemberCollection
     {
         BSTree Members = new BSTree();
 
-        public int Number => Members.Count();
-
         public void add(Member aMember)
         {
-            if (search(aMember) == false)
+            if (!search(aMember))
                 Members.Insert(aMember);
         }
 
         public void delete(Member aMember)
         {
-            Members.Delete(aMember);
+            if(search(aMember))
+                Members.Delete(aMember);
         }
 
-        public bool search(Member aMember)
-        {
-            return Array.Exists(toArray(), m => 
-                   string.Equals(m.FirstName, aMember.FirstName, StringComparison.OrdinalIgnoreCase) 
-                && string.Equals(m.LastName, aMember.LastName, StringComparison.OrdinalIgnoreCase) 
-                && m.PIN == aMember.PIN);
-        }
+        public int Number => Members.Count();
 
-        // NOT PART OF THE INTERFACE!
-        public Member get(string firstName, string lastName, string pin)
-        {
-            return Array.Find(toArray(), m =>
-                    string.Equals(m.FirstName, firstName, StringComparison.OrdinalIgnoreCase)
-                 && string.Equals(m.LastName, lastName, StringComparison.OrdinalIgnoreCase)
-                 && m.PIN == pin);
-        }
+        public bool search(Member aMember) => Members.Search(aMember);
 
-        public Member[] toArray()
-        {
-            return Array.ConvertAll(Members.ToArray(), m => (Member)m);
-        }
+        public Member[] toArray() => Members.ToArray();
     }
 }

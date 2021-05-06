@@ -1,251 +1,211 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace CAB301_ToolLibrarySystem
 {
     class Program
     {
-        static ToolLibrarySystem ToolSystem = new ToolLibrarySystem();
-        static Member LoggedInAs;
+        static ToolLibrarySystem toolLibrarySystem = new ToolLibrarySystem();
+        static Program Instance;
 
         static void Main(string[] args)
         {
-            ToolSystem.Members.add(new Member("Thomas", "Fabian", "01189998819991197253", "1234"));
-            ToolSystem.Members.add(new Member("samohT", "naibaF", "35279119991889998110", "4321"));
+            Instance = new Program();
+            Instance.Init();
             MainMenu();
+        }
+
+        private void Init()
+        {
+            toolLibrarySystem = new ToolLibrarySystem();
+            toolLibrarySystem.add(new Member("Thomas", "Fabian", "0118 999 88199 9119 725 3", "1234"));
+            toolLibrarySystem.add(new Member("samohT", "naibaF", "3 527 9119 99188 999 8110", "4321"));
         }
 
         static void MainMenu()
         {
-            /*  Members are verified using their first name, last name and password:
-             *      staff username/pass = staff/today123
-             */
-            Console.Clear();
-            Console.WriteLine("Welcome to the Tool Library");
-            Console.WriteLine("Main Menu".PadSides(31, '='));
+            ConsoleLib.StartMenu("Main Menu");
 
-            Console.WriteLine("1. Staff Login");
-            Console.WriteLine("2. Member Login");
-            Console.WriteLine("0. Exit");
-
-            Console.WriteLine(new String('=', 31));
-
-            Console.WriteLine("\nPlease make a selection (1-2, or 0 to exit):");
-
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            ConsoleKey key = keyInfo.Key;
-
-            switch(key)
+            // OPTIONS AVAILABLE FOR THIS MENU
+            Dictionary<string, Action> options = new Dictionary<string, Action>
             {
-                case ConsoleKey.D1: StaffLogin(); return;
-                case ConsoleKey.D2: MemberLogin(); return;
-                case ConsoleKey.D0: return;
-                default: MainMenu(); return;
+                {"Staff Login",     new Action(StaffLogin) },
+                {"Member Login",    new Action(MemberLogin) },
+            };
+
+
+            // PRINTS SELECTION MENU BASED ON OPTIONS ABOVE
+            if (ConsoleLib.SelectFromDictionary(out Action action, options))
+            {
+                action.Invoke();    // INVOKE SELECTED ACTION
+                MainMenu();         // RECURSIVE MENU, WHILE LOOPS CAN BE EVIL
             }
         }
 
         static void StaffLogin()
         {
-            Console.Clear();
+            ConsoleLib.StartMenu("Staff Login");
 
-            Console.WriteLine("Welcome to the Tool Library");
-            Console.WriteLine("Staff Login".PadSides(31, '='));
-            Console.Write("Enter Username:".PadRight(18));
-            if (!StringLib.ReadInput(out string username, 0, 15, flags:StringLib.InputFlags.Alpha))
-                return;
-            Console.Write("Enter Password:".PadRight(18));
-            if (!StringLib.ReadInput(out string password, 0, 15, flags: StringLib.InputFlags.Password))
-                return;
-
-            if (username == "staff" && password == "today123")
-                StaffMenu();
-            else
-            {
-                Console.WriteLine("\nInvalid username or password. (0 to exit or any key to try again)");
-                switch (Console.ReadKey().Key)
-                {
-                    case ConsoleKey.D0:MainMenu(); return;
-                    default: StaffLogin(); return;
+            Console.Write("\tEnter Username: ");
+            if (ConsoleLib.ReadInput(out string username, 0, 15, ConsoleLib.InputFlags.Alpha)) {
+                Console.Write("\tEnter Password: ");
+                if (ConsoleLib.ReadInput(out string password, 0, 15, ConsoleLib.InputFlags.Password)) {
+                    if (username == "staff" && password == "today123")
+                        StaffMenu();
+                    else
+                    {
+                        Console.WriteLine("\nInvalid username or password. (Escape to exit or any key to try again)");
+                        switch (Console.ReadKey().Key)
+                        {
+                            case ConsoleKey.Escape: MainMenu(); return;
+                            default: StaffLogin(); return;
+                        }
+                    }
                 }
             }
         }
 
         static void MemberLogin()
         {
-            Console.Clear();
+            ConsoleLib.StartMenu("Member Login");
 
-            Console.WriteLine("Welcome to the Tool Library");
-            Console.WriteLine("Member Login".PadSides(31, '='));
-            Console.Write("Enter First Name:".PadRight(18));
-            if (!StringLib.ReadInput(out string firstName, 1, 15, flags:StringLib.InputFlags.Alpha))
-                return;
-            Console.Write("Enter Last Name:".PadRight(18));
-            if (!StringLib.ReadInput(out string lastName, 1, 15, flags: StringLib.InputFlags.Alpha))
-                return;
-            Console.Write("Enter PIN:".PadRight(18));
-            if (!StringLib.ReadInput(out string pin, 4, 4, flags: StringLib.InputFlags.Numbers))
-                return;
-
-            Member member = (Member)ToolSystem.Members.get(firstName, lastName, pin);
-
-            if (member != null)
-                MemberMenu(member);
-            else
+            Console.Write("Enter Username: ");
+            if (ConsoleLib.ReadInput(out string username, 0, 15, ConsoleLib.InputFlags.Alpha))
             {
-                Console.WriteLine("\nInvalid login details. (0 to exit or any key to try again)");
-                switch (Console.ReadKey().Key)
+                Console.Write("Enter PIN: ");
+                if (ConsoleLib.ReadInput(out string pin, 4, 4, ConsoleLib.InputFlags.Numbers))
                 {
-                    case ConsoleKey.D0: MainMenu(); return;
-                    default: MemberLogin(); return;
+                    toolLibrarySystem = new ToolLibrarySystem(username, pin, out Member loggedInAs);
+
+                    if (loggedInAs != null)
+                        MemberMenu(loggedInAs);
                 }
             }
         }
 
         static void StaffMenu()
         {
-            Console.Clear();
+            ConsoleLib.StartMenu("Staff Menu");
 
-            Console.WriteLine("Welcome to the Tool Library");
-            Console.WriteLine("Staff Menu".PadSides(31, '='));
-
-            Console.WriteLine("1. Add a new tool");
-            Console.WriteLine("2. Add new pieces of an existing tool");
-            Console.WriteLine("3. Remove some pieces of a tool");
-            Console.WriteLine("4. Register a new member");
-            Console.WriteLine("5. Remove a member");
-            Console.WriteLine("6. Find the contact number of a member");
-            Console.WriteLine("0. Return to main menu");
-
-            Console.WriteLine(new string('=', 31));
-
-            Console.WriteLine("\nPlease make a selection (1-6, or 0 to return to main menu):");
-
-            switch (Console.ReadKey(true).Key)
+            Dictionary<string, Action> options = new Dictionary<string, Action>
             {
-                case ConsoleKey.D1: AddNewTool(); break;
-                case ConsoleKey.D2: AddToExistingTool(); break;
-                case ConsoleKey.D3: RemoveFromExistingTool(); break;
-                case ConsoleKey.D4: RegisterNewMember(); break;
-                case ConsoleKey.D5: RemoveMember(); break;
-                case ConsoleKey.D6: FindContactNumber(); break;
-                case ConsoleKey.D0: MainMenu(); return;
-                default: StaffMenu(); return;
+                {"Add a new tool",                      new Action(AddNewTool) },
+                {"Add new pieces of an existing tool",  new Action(AddToExistingTool) },
+                {"Remove some pieces of a tool",        new Action(RemoveFromExistingTool) },
+                {"Register a new member",               new Action(RegisterNewMember) },
+                {"Remove a member",                     new Action(RemoveMember) },
+                {"Find the contact number of a member", new Action(FindContactNumber) },
+            };
+
+            if (ConsoleLib.SelectFromDictionary(out Action action, options))
+            {
+                action.Invoke();
+                StaffMenu();
             }
 
             void AddNewTool()
             {
                 // SELECT CATEGORY
-                Console.Clear();
-                Console.WriteLine("Welcome to the Tool Library");
-                Console.WriteLine("Staff Menu - New Tool".PadSides(31, '='));
-                Console.WriteLine("Select new Tool Category");
-                if (!StringLib.DoSelectFromEnumType(typeof(Tools.Categories), out int category))
-                    return;
-                
-                // SELECT SUB-CATEGORY
-                Console.Clear();
-                Console.WriteLine("Welcome to the Tool Library");
-                Console.WriteLine("Staff Menu - New Tool".PadSides(31, '='));
-                Console.WriteLine("Select new Tool Sub-Category");
-                if (!StringLib.DoSelectFromEnumType(Tools.SubCategory(category), out int subType))
-                    return;
+                ConsoleLib.StartMenu("Staff Menu - Add New Tool");
 
-                // ENTER TOOL NAME
-                Console.Clear();
-                Console.WriteLine("Welcome to the Tool Library");
-                Console.WriteLine("Staff Menu - New Tool".PadSides(31, '='));
                 Console.Write("Enter new Tool Name:");
-                if (!StringLib.ReadInput(out string name, maxLength:20, flags:StringLib.InputFlags.TextEntry | StringLib.InputFlags.Numbers))
-                    return;
-
-                // CREATE NEW TOOL OBJECT AND ADD TO SYSTEM
-                string path = string.Format("{0}{3}{1}{3}{2}", category, subType, name, StringLib.DELIMITER);
-
-                Console.WriteLine(path);
-                Console.ReadKey();
-
-                ToolSystem.add(new Tool(path, 0));
+                if (ConsoleLib.ReadInput(out string name, flags:ConsoleLib.InputFlags.TextEntry | ConsoleLib.InputFlags.Numbers)) {
+                    toolLibrarySystem.add(new Tool(name, 1));
+                }
             }
 
             void AddToExistingTool()
             {
+                ConsoleLib.StartMenu("Staff Menu - Add to Existing Tool");
 
+                toolLibrarySystem.add(new Tool("None", 0), 0);
             }
 
             void RemoveFromExistingTool()
             {
+                ConsoleLib.StartMenu("Staff Menu - Remove from Existing Tool");
+
 
             }
 
             void RegisterNewMember()
             {
+                ConsoleLib.StartMenu("Staff Menu - Register new Member");
 
             }
 
             void RemoveMember()
             {
+                ConsoleLib.StartMenu("Staff Menu - Remove existing Member");
 
             }
 
             void FindContactNumber()
             {
+                ConsoleLib.StartMenu("Staff Menu - Find Member's Contact Number");
 
             }
         }
 
-        static void MemberMenu(Member member)
+        static void MemberMenu(Member loggedInMember)
         {
-            Console.Clear();
+            ConsoleLib.StartMenu("Member Menu");
 
-            Console.WriteLine("Welcome to the Tool Library");
-            Console.WriteLine("Member Menu".PadSides(31, '='));
-
-            Console.WriteLine("1. Display all the tools of a tool type");
-            Console.WriteLine("2. Borrow a tool");
-            Console.WriteLine("3. Return a tool");
-            Console.WriteLine("4. List all the tools that I am renting");
-            Console.WriteLine("5. Display top three (3) most frequently rented tools");
-            Console.WriteLine("0. Return to main menu");
-
-            Console.WriteLine(new string('=', 31));
-
-            Console.WriteLine("\nPlease make a selection (1-5, or 0 to return to main menu):");
-
-            switch (Console.ReadKey(true).Key)
+            Dictionary<string, Action> options = new Dictionary<string, Action>
             {
-                case ConsoleKey.D1: DisplayToolsOfType(); break;
-                case ConsoleKey.D2: BorrowTool(); break;
-                case ConsoleKey.D3: ReturnTool(); break;
-                case ConsoleKey.D4: ListMyRentedTools(); break;
-                case ConsoleKey.D5: ListMyRentedTools(); break;
-                case ConsoleKey.D6: DisplayTopThreeRentedTools(); break;
-                case ConsoleKey.D0: MainMenu(); return;
+                {"Display all the tools of a tool type",                new Action(DisplayToolsOfType) },
+                {"Borrow a tool",                                       new Action(BorrowTool) },
+                {"Return a tool",                                       new Action(ReturnTool) },
+                {"List all the tools that I am renting",                new Action(ListMyRentedTools) },
+                {"Display top three (3) most frequently rented tools",  new Action(DisplayTopThreeRentedTools) },
+            };
+
+            if (ConsoleLib.SelectFromDictionary(out Action action, options))
+            {
+                action.Invoke();
+                MemberMenu(loggedInMember);
             }
 
-            MemberMenu(member); // Refresh Menu
 
             void DisplayToolsOfType()
             {
+                ConsoleLib.StartMenu("Member Menu - Display Tools of Type");
 
+                if (ConsoleLib.SelectToolCategory(out string category))
+                    if (ConsoleLib.SelectToolType(out string toolType, category))
+                        toolLibrarySystem.displayTools(category + '/' + toolType);
+
+                ConsoleLib.KeyWait();
             }
 
             void BorrowTool()
             {
+                ConsoleLib.StartMenu("Member Menu - Borrow a Tool");
 
             }
 
             void ReturnTool()
             {
+                ConsoleLib.StartMenu("Member Menu - Return a Tool");
 
             }
 
             void ListMyRentedTools()
             {
+                ConsoleLib.StartMenu("Member Menu - List my rented Tools");
+
+                toolLibrarySystem.displayBorrowingTools(loggedInMember);
 
             }
 
             void DisplayTopThreeRentedTools()
             {
+                ConsoleLib.StartMenu("Member Menu - Top Three (3) borrowed Tools");
 
+                toolLibrarySystem.displayTopThree();
             }
         }
     }

@@ -4,42 +4,42 @@ using System.Text;
 
 namespace CAB301_ToolLibrarySystem
 {
-    class ToolCollection : iToolCollection
+    public class ToolCollection : iToolCollection
     {
-        Tool[] Tools = new Tool[0];
+        private Tool[] collection = new Tool[1];
 
-        public int Number => Array.FindAll(Tools, t => t != null).Length;
+        public int Number => Array.FindAll(collection, t => t != null).Length;
 
         public void add(Tool aTool)
         {
-            Tools[Number] = aTool;
-            Array.Resize(ref Tools, Number + 1); // Resize to add empty entry
+            collection[Number] = aTool;
+            Array.Resize(ref collection, Number + 1); // Resize to add empty entry
         }
 
         public void delete(Tool aTool)
         {
-            int i = Array.IndexOf(Tools, aTool);
+            int i = Array.IndexOf(collection, aTool);
             if (i == -1)
                 return;
 
             // Remove item
-            Tools[i] = null;
+            collection[i] = null;
 
             // Shift every item up
             for (; i < Number; i++)
-                Tools[i] = Tools[i + 1];
+                collection[i] = collection[i + 1];
 
-            Array.Resize(ref Tools, Number - 1); // Resize to remove empty entry
+            Array.Resize(ref collection, Number - 1); // Resize to remove empty entry
         }
 
         public bool search(Tool aTool)
         {
-            return Array.IndexOf(Tools, aTool) > -1;
+            return Array.IndexOf(collection, aTool) > -1;
         }
 
         public Tool[] toArray()
         {
-            return Tools;
+            return collection;
         }
     }
 }

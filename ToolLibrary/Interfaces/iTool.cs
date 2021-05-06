@@ -7,9 +7,8 @@ namespace CAB301_ToolLibrarySystem
     //The specification of Tool ADT
     interface iTool
     {
-
         /// <summary>
-        /// Get and Set the name of this tool
+        /// get and set the name of this tool
         /// </summary>
         string Name
         {
@@ -18,7 +17,7 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Get and Set the quantity of this tool
+        /// get and set the quantity of this tool
         /// </summary>
         int Quantity
         {
@@ -27,7 +26,7 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Get and set the quantity of this tool currently available to lend
+        /// get and set the quantity of this tool currently available to lend
         /// </summary>
         int AvailableQuantity
         {
@@ -36,39 +35,37 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Get and set the number of times that this tool has been borrowed
+        /// get and set the number of times that this tool has been borrowed
         /// </summary>
-        int NoBorrowings 
+        int NoBorrowings
         {
             get;
             set;
         }
 
         /// <summary>
-        /// Get all the members who are currently holding this tool
+        /// get all the members who are currently holding this tool
         /// </summary>
-        iMemberCollection GetBorrowers
+        MemberCollection GetBorrowers
         {
             get;
         }
 
         /// <summary>
-        /// Add a member to the borrower list
+        /// add a member to the borrower list
         /// </summary>
-        /// <param name="aMember">A User within the ToolLibrarySystem</param>
         void addBorrower(Member aMember);
 
         /// <summary>
-        /// Delte a member from the borrower list
+        /// delete a member from the borrower list
         /// </summary>
-        /// <param name="aMember">A User within the ToolLibrarySystem</param>
+        /// <param name="aMember"></param>
         void deleteBorrower(Member aMember);
 
         /// <summary>
-        /// Return a string containning the name and the available quantity of this tool 
+        /// return a string containning the name and the available quantity quantity this tool 
         /// </summary>
-        /// <returns>Returns a string containing the name and available quantity of this tool</returns>
-        string ToString(); 
+        string ToString();
 
     }
 

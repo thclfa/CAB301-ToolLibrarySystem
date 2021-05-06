@@ -1,48 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Linq;
 
 namespace CAB301_ToolLibrarySystem
 {
-    class Member : iMember, IComparable
+    public class Member : iMember, IComparable<Member>
     {
         string firstName;
         string lastName;
         string contactNumber;
         string pin;
+        ToolCollection tools = new ToolCollection();
 
-        public Member(string firstName, string lastName, string contactNumber, string pin)
-        {
+        public Member(string firstName, string lastName, string contactNumber, string pin) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.contactNumber = contactNumber;
             this.pin = pin;
         }
+
         public string FirstName { get => firstName; set => firstName = value; }
         public string LastName { get => lastName; set => lastName = value; }
         public string ContactNumber { get => contactNumber; set => contactNumber = value; }
-        public string PIN { get => pin; set => firstName = value; }
-
-        public string[] Tools => throw new NotImplementedException();
+        public string PIN { get => pin; set => pin = value; }
+        public string[] Tools => tools.toArray().Select(t => t.Name).ToArray();
 
         public void addTool(Tool aTool)
         {
-            throw new NotImplementedException();
+            if (tools.toArray().Length < 3)
+                tools.add(aTool);
         }
 
         public void deleteTool(Tool aTool)
         {
-            throw new NotImplementedException();
-        }
-
-        public int CompareTo(object obj)
-        {
-            return string.Compare(this.ToString(), obj.ToString());
+            tools.delete(aTool);
         }
 
         public override string ToString()
         {
             return string.Format("{0} {1} {2}", FirstName, LastName, ContactNumber);
+        }
+
+        public int CompareTo(Member other)
+        {
+            return (LastName + FirstName).CompareTo(other.LastName + other.FirstName);
         }
     }
 }

@@ -5,19 +5,19 @@ using System.Text;
 namespace CAB301_ToolLibrarySystem
 {
     //The specification of Member ADT
-    interface iMember : IComparable
+    interface iMember
     {
+
         /// <summary>
-        /// Get and Set the first name of this member
+        /// get and set the first name of this member
         /// </summary>
         string FirstName
         {
             get;
             set;
         }
-
         /// <summary>
-        /// Get and Set the last name of this member
+        /// get and set the last name of this member
         /// </summary>
         string LastName
         {
@@ -26,7 +26,7 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Get and Set the contact number of this member
+        /// get and set the contact number of this member
         /// </summary>
         string ContactNumber
         {
@@ -35,7 +35,7 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Get and Set the password of this member
+        /// get and set the password of this member
         /// </summary>
         string PIN
         {
@@ -44,7 +44,7 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Get a list of tools that this member is currently holding
+        /// get a list of tools that this memebr is currently holding
         /// </summary>
         string[] Tools
         {
@@ -52,21 +52,19 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Add a given tool to the list of tools that this member is currently holding
+        /// add a given tool to the list of tools that this member is currently holding
         /// </summary>
-        /// <param name="aTool">Tool to be added</param>
         void addTool(Tool aTool);
 
         /// <summary>
-        /// Delete a given tool from the list of tools that this member is currently holding
+        /// delete a given tool from the list of tools that this member is currently holding
         /// </summary>
-        /// <param name="aTool">Tool to be deleted</param>
         void deleteTool(Tool aTool);
 
         /// <summary>
-        /// Return a string containing the first name, lastname, and contact phone number of this memeber
+        /// return a string containing the first name, lastname, and contact phone number of this memeber
         /// </summary>
-        /// <returns>Returns a string containing the first name, last name and contact phone number of the member</returns>
+        /// <returns></returns>
         string ToString();
     }
 }
