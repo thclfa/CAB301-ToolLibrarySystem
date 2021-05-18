@@ -6,177 +6,55 @@ namespace CAB301_ToolLibrarySystem
 {
     class ToolLibrarySystem : iToolLibrarySystem
     {
-        private static readonly Dictionary<string, Dictionary<string, ToolCollection>> toolCollections = new Dictionary<string, Dictionary<string, ToolCollection>>
-        {
-            {
-                "Gardening Tools", new Dictionary<string, ToolCollection>()
-                {
-
-                    { "Line Trimmers", new ToolCollection() },
-                    { "Lawn Mowers", new ToolCollection() },
-                    { "Hand Tools", new ToolCollection() },
-                    { "Wheelbarrows", new ToolCollection() },
-                    { "Garden Power Tools", new ToolCollection() },
-                }
-            },
-            {
-                "Flooring Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Scrapers", new ToolCollection() },
-                    { "Floor Lasers", new ToolCollection() },
-                    { "Floor Levelling Tools", new ToolCollection() },
-                    { "Floor Levelling Materials", new ToolCollection() },
-                    { "Floor Hand Tools", new ToolCollection() },
-                    { "Tiling Tools", new ToolCollection() },
-                }
-            },
-            {
-                "Fencing Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Hand Tools", new ToolCollection() },
-                    { "Electric Fencing", new ToolCollection() },
-                    { "Steel Fencing Tools", new ToolCollection() },
-                    { "Power Tools", new ToolCollection() },
-                    { "Fencing Accessories", new ToolCollection() },
-                }
-            },
-            {
-                "Measuring Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Distance Tools", new ToolCollection() },
-                    { "Laser Measurer", new ToolCollection() },
-                    { "Measuring Jugs", new ToolCollection() },
-                    { "Temperature & Humidity Tools", new ToolCollection() },
-                    { "Levelling Tools", new ToolCollection() },
-                    { "Markers", new ToolCollection() },
-                }
-            },
-            {
-                "Cleaning Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Draining Tools", new ToolCollection() },
-                    { "Car Cleaning", new ToolCollection() },
-                    { "Vacuum", new ToolCollection() },
-                    { "Pressure Cleaners", new ToolCollection() },
-                    { "Pool Cleaning", new ToolCollection() },
-                    { "Floor Cleaning", new ToolCollection() },
-                }
-            },
-            {
-                "Painting Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Sanding Tools", new ToolCollection() },
-                    { "Brushes", new ToolCollection() },
-                    { "Rollers", new ToolCollection() },
-                    { "Paint Removal Tools", new ToolCollection() },
-                    { "Paint Scrapers", new ToolCollection() },
-                    { "Sprayers", new ToolCollection() },
-                }
-            },
-            {
-                "Electronic Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Voltage Tester", new ToolCollection() },
-                    { "Oscilloscopes", new ToolCollection() },
-                    { "Thermal Imaging", new ToolCollection() },
-                    { "Data Test Tool", new ToolCollection() },
-                    { "Insulation Testers", new ToolCollection() },
-                }
-            },
-            {
-                "Electricity Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Test Equipment", new ToolCollection() },
-                    { "Safety Equipment", new ToolCollection() },
-                    { "Basic Hand Tools", new ToolCollection() },
-                    { "Circuit Protection", new ToolCollection() },
-                    { "Cable Tools", new ToolCollection() },
-                }
-            },
-            {
-                "Automotive Tools", new Dictionary<string, ToolCollection>()
-                {
-                    { "Jacks", new ToolCollection() },
-                    { "Air Compressors", new ToolCollection() },
-                    { "Battery Chargers", new ToolCollection() },
-                    { "Socket Tools", new ToolCollection() },
-                    { "Braking", new ToolCollection() },
-                    { "Drive train", new ToolCollection() },
-                }
-            }
-        };
-        private static readonly MemberCollection Members = new MemberCollection();
+        private Dictionary<string, Dictionary<string, ToolCollection>> ToolCollections;
+        private MemberCollection Members;
 
         /// CONSTRUCTOR SORCERY
-        public ToolLibrarySystem() { } // Empty constructor
-        public ToolLibrarySystem(string username, out Member member) 
+        public ToolLibrarySystem(ref MemberCollection members, ref Dictionary<string, Dictionary<string, ToolCollection>> toolCollections) 
         {
-            member = selectMember(username); // Just returns a member by username search
-        }
-
-        public ToolLibrarySystem(string username, string pin, out Member loggedInMember)
-        {
-            Member member = selectMember(username); // Just returns a member by username search
-            loggedInMember = member.PIN.Equals(pin) ? member : null; 
+            this.Members = members;
+            this.ToolCollections = toolCollections;
         }
 
         /// PRIVATE METHODS
-        private Member selectMember(string username)
-        {
-            return Members.toArray().FirstOrDefault(m => (m.FirstName + m.LastName).Equals(username));
-        }
-
-        private Tool selectTool()
-        {
-            if (ConsoleLib.SelectFromArray(out Tool tool, selectToolCollection().toArray()))
-                return tool;
-            return null;
-        }
-
-        private ToolCollection selectToolCollection()
+        private bool ConsoleSelectCollection(out ToolCollection collection)
         {
             if (ConsoleLib.SelectToolCategory(out string category))
                 if (ConsoleLib.SelectToolType(out string toolType, category))
-                    return toolCollections[category][toolType];
-            return null;
+                {
+                    collection = ToolCollections[category][toolType];
+                    return true;
+                }
+
+            collection = null;
+            return false;
         }
 
-        private ToolCollection getCollection(Tool aTool)
+        private ToolCollection GetCollection(Tool aTool)
         {
-            return toolCollections.Values.SelectMany(x => x.Values).Where(x => x.search(aTool)).First();
+            return ToolCollections.Values
+                .SelectMany(category => category.Values)
+                .Where(collection => collection.toArray().Any(tool => tool == aTool))
+                .FirstOrDefault();
         }
-
-        private Tool getTool(ToolCollection collection, string name)
-        {
-            return collection.toArray().Where(x => x.Name.Equals(name)).First();
-        }
-
-        private Tool[] toArray()
-        {
-            return toolCollections.Values.SelectMany(x => x.Values).SelectMany(x => x.toArray()).ToArray();
-        }
-
 
         /// INTERFACE METHODS
         public void add(Tool aTool)
         {
-            ToolCollection collection = selectToolCollection();
-
-            if (!collection.search(aTool))
-                collection.add(aTool);
+            if (ConsoleSelectCollection(out ToolCollection collection))
+            {
+                // If the tool already exists, just add 1 quantity
+                if (collection.search(aTool))
+                    add(aTool, 1);
+                else
+                    collection.add(aTool);
+            }
         }
 
         public void add(Tool aTool, int quantity)
         {
-            ToolCollection collection = selectToolCollection();
-
-            if (!collection.search(aTool))
-                return;
-
-            Tool t = getTool(collection, aTool.Name);
-
-            t.Quantity += quantity;
-            t.AvailableQuantity += quantity;
+            aTool.Quantity += quantity;
+            aTool.AvailableQuantity += quantity;
         }
 
         public void delete(Tool aTool)
@@ -184,7 +62,7 @@ namespace CAB301_ToolLibrarySystem
             if (aTool.GetBorrowers.Number > 0)
                 return;
 
-            ToolCollection collection = getCollection(aTool);
+            ToolCollection collection = GetCollection(aTool);
 
             collection.delete(aTool);
         }
@@ -207,7 +85,6 @@ namespace CAB301_ToolLibrarySystem
 
         public void delete(Member aMember)
         {
-            // Only delete the member if they aren't borrowing any tools.
             if (aMember.Tools.Length == 0)
                 Members.delete(aMember);
         }
@@ -223,24 +100,24 @@ namespace CAB301_ToolLibrarySystem
 
         public void returnTool(Member aMember, Tool aTool)
         {
-            if (aMember.Tools.Contains(aTool.Name))
-            {
-                aMember.deleteTool(aTool);
+            if (!aMember.Tools.Contains(aTool.Name))
+                return;
+
+            aMember.deleteTool(aTool);
+
+            // The member may still have another instance of this tool
+            if (!aMember.Tools.Contains(aTool.Name))
                 aTool.deleteBorrower(aMember);
-            }
         }
 
         public void displayBorrowingTools(Member aMember)
         {
-            Console.WriteLine(string.Format("{0} {1}'s Borrowed Tools", aMember.FirstName, aMember.LastName)
-                .PadSides(ConsoleLib.WIDTH, ' '));
-            Console.WriteLine(new string('=', ConsoleLib.WIDTH));
+            Console.WriteLine($"{aMember.FirstName} {aMember.LastName}'s Borrowed Tools".Pad(' '));
+            Console.WriteLine(new string('-', ConsoleLib.WIDTH));
 
             for (int i = 0; i < aMember.Tools.Length; i++)
             {
-                Console.WriteLine(string.Format("{0}. {1}",
-                    i.ToString().PadLeft(5),
-                    aMember.Tools[i]));
+                Console.WriteLine($"{i + 1,5}. {aMember.Tools[i]}");
             }
         }
 
@@ -249,25 +126,35 @@ namespace CAB301_ToolLibrarySystem
             string[] split = aToolType.Split("/");
             string collection = split[0];
             string toolType = split[1];
-            Tool[] tools = toolCollections[collection][toolType].toArray();
+            Tool[] tools = ToolCollections[collection][toolType].toArray();
+
+            Console.WriteLine($"\n" +
+                $"{" ",7}" +
+                $"{"Tool Name",-45}" +
+                $"{"Available Qty",15}" +
+                $"{"Total Qty",15}" +
+                $"\n{'-'.Mul(Console.WindowWidth)}");
 
             for (int i = 0; i < tools.Length; i++)
             {
-                Console.WriteLine(string.Format("{0}. {1}", 
-                    i.ToString().PadLeft(5), 
-                    tools[i].ToString()));
+                if (tools[i] != null)
+                    Console.WriteLine($"{i + 1,5}. {tools[i]}");
             }
+
         }
 
         public void displayTopThree()
         {
-            Tool[] sorted = toArray();
-            sorted.OrderByDescending(x => x.NoBorrowings);
+            Tool[] flattened = ToolCollections.Values.SelectMany(s => s.Values.SelectMany(c => c.toArray())).ToArray();
+            Tool[] sorted = flattened.CountingSort(t => t.NoBorrowings);
+            Array.Reverse(sorted);
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < Math.Min(3, sorted.Length); i++)
             {
                 Tool tool = sorted[i];
-                Console.WriteLine("{0}. {1} has been borrowed {2} times.", i.ToString().PadLeft(5), tool.Name, tool.NoBorrowings);
+
+                if (tool != null)
+                    Console.WriteLine($"{i + 1,5}. {tool.Name} has been borrowed {tool.NoBorrowings} times.");
             }
         }
 

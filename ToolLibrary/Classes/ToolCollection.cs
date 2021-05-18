@@ -6,30 +6,34 @@ namespace CAB301_ToolLibrarySystem
 {
     public class ToolCollection : iToolCollection
     {
-        private Tool[] collection = new Tool[1];
+        private Tool[] collection = new Tool[0];
 
-        public int Number => Array.FindAll(collection, t => t != null).Length;
+        public int Number => collection.Length;
 
         public void add(Tool aTool)
         {
-            collection[Number] = aTool;
             Array.Resize(ref collection, Number + 1); // Resize to add empty entry
+            collection[Number - 1] = aTool;
         }
 
         public void delete(Tool aTool)
         {
+            // Get index of tool
             int i = Array.IndexOf(collection, aTool);
-            if (i == -1)
-                return;
 
-            // Remove item
-            collection[i] = null;
+            // If the tool was found
+            if (i != -1)
+            {
+                // Remove tool
+                collection[i] = null;
 
-            // Shift every item up
-            for (; i < Number; i++)
-                collection[i] = collection[i + 1];
+                // If the array has more entries to the right, shift them to the left
+                for (; i < Number - 1; i++)
+                    collection[i] = collection[i + 1];
 
-            Array.Resize(ref collection, Number - 1); // Resize to remove empty entry
+                // Resize to remove right-most null entry
+                Array.Resize(ref collection, Number - 1); 
+            }
         }
 
         public bool search(Tool aTool)

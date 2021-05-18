@@ -4,10 +4,12 @@ using System.Linq;
 
 namespace CAB301_ToolLibrarySystem
 {
+    /// <summary>
+    /// Console Library that assists in GUI functionality
+    /// </summary>
     public static class ConsoleLib
     {
-        public const char DELIMITER = '\t';
-        public const int WIDTH = 50;
+        public static int WIDTH => Console.WindowWidth;
 
         /// <summary>
         /// Dictionary containing Tool Categories and their Tool Type designations.
@@ -115,20 +117,6 @@ namespace CAB301_ToolLibrarySystem
         public static string[] ToolTypes(string category) => Tools[category];
 
         /// <summary>
-        /// Returns a new string center-aligned with some padding character on the left and right sides.
-        /// </summary>
-        /// <param name="str">String to pad</param>
-        /// <param name="width">Width of padding</param>
-        /// <param name="paddingChar">Char to pad</param>
-        /// <returns>A new string center-aligned with some padding character on the left and right sides</returns>
-        public static string PadSides(this string str, int width, char paddingChar = ' ')
-        {
-            int padding = width - str.Length;
-            int padLeft = padding / 2 + str.Length;
-            return str.PadLeft(padLeft, paddingChar).PadRight(width, paddingChar);
-        }
-
-        /// <summary>
         /// Performs a GUI Selection query from 1 to array.Length using numeric keys.
         /// </summary>
         /// <param name="item">Selected item of type T to be output</param>
@@ -138,28 +126,32 @@ namespace CAB301_ToolLibrarySystem
         {
             item = default;
 
-            for (int i = 1; i <= array.Length; i++)
-                Console.WriteLine(string.Format("{0}. {1}", i, array[i-1].ToString()));
+            // Loop print each tool
+            for (int i = 0; i < array.Length; i++)
+                Console.WriteLine($"{i + 1,5}. {array[i]}");
 
-            Console.WriteLine(string.Format("\nPlease make a selection (1-{0} or [Escape] to exit)", array.Length));
+            Console.WriteLine($"\nPlease make a selection (1-{array.Length} or [Escape] to exit)");
 
+            // Selection loop
             while (true)
             {
-                Console.Write("Enter Selection: ");
-                if (ReadInput(out string input, 1, 2, InputFlags.Numbers))
+                if (ReadInput("Enter Selection: ", out string input, 1, 2, InputFlags.Numbers))
                 {
                     int i = int.Parse(input) - 1; // Take 1 as arrays are begin at 0.
-                    if (i <= array.Length)
+
+                    // Can't accept inputs above the allowable indices
+                    if (i < array.Length)
                     {
                         item = array[i];
                         return true;
                     }
                     else
                     {
-                        Console.WriteLine("\nError: Invalid Input. Please try again.");
+                        KeyWait("Error: Invalid index.");
                         return false;
                     }
                 }
+                else return false;
             }
         }
 
@@ -167,7 +159,7 @@ namespace CAB301_ToolLibrarySystem
         /// Performs a GUI Selection query from 1 to array.Length using numeric keys.
         /// </summary>
         /// <param name="item">Selected item of type T to be output</param>
-        /// <param name="array">Array of type T to query</param>
+        /// <param name="dict">Dictionary of type T to query</param>
         /// <returns>Returns true on successful query. Returns false if exited.</returns>
         public static bool SelectFromDictionary<T>(out T item, Dictionary<string,T> dict)
         {
@@ -175,32 +167,28 @@ namespace CAB301_ToolLibrarySystem
             string[] keys = dict.Keys.ToArray();
             T[] vals = dict.Values.ToArray();
 
-            for (int i = 1; i <= keys.Length; i++)
-                Console.WriteLine(string.Format("{0}. {1}", i.ToString().PadLeft(5), keys[i - 1].ToString()));
+            for (int i = 0; i < keys.Length; i++)
+                Console.WriteLine($"{i + 1,5}. {keys[i]}");
 
-            Console.WriteLine(string.Format("\nPlease make a selection (1-{0} or [Escape] to exit)", keys.Length));
+            Console.WriteLine($"\nPlease make a selection (1-{keys.Length} or [Escape] to exit)");
 
             while (true)
             {
-                Console.Write("Enter selection: ");
-                if (ReadInput(out string input, 1, 2, InputFlags.Numbers))
+                if (ReadInput("Enter selection: ", out string input, 1, 2, InputFlags.Numbers))
                 {
-                    int i = int.Parse(input) - 1; // Take 1 as arrays are begin at 0.
-                    if (i <= keys.Length)
+                    int i = int.Parse(input) - 1;
+                    if (i < keys.Length)
                     {
                         item = vals[i];
                         return true;
                     }
                     else
                     {
-                        Console.WriteLine("\nError: Invalid Input. Please try again.");
+                        KeyWait("Error: Invalid index.");
                         return false;
                     }
                 }
-                else
-                {
-                    return false;
-                }
+                else return false;
             }
         }
 
@@ -209,6 +197,8 @@ namespace CAB301_ToolLibrarySystem
         /// </summary>
         public static bool SelectToolCategory(out string category)
         {
+            Console.WriteLine($"\n{"Select Tool Category".Pad(' ')}\n" +
+                              $"{'-'.Mul(WIDTH)}\n");
             return SelectFromArray(out category, Categories);
         }
 
@@ -217,69 +207,83 @@ namespace CAB301_ToolLibrarySystem
         /// </summary>
         public static bool SelectToolType(out string toolType, string category)
         {
+            Console.WriteLine($"\n{"Select Tool Type".Pad(' ')}\n" +
+                              $"{'-'.Mul(WIDTH)}\n");
             return SelectFromArray(out toolType, ToolTypes(category));
         }
 
         /// <summary>
         /// Clears console and prints title bar.
         /// </summary>
-        /// <param name="menuTitle">Menu Title bar text</param>
-        public static void StartMenu(string menuTitle)
+        /// <param name="title">Menu Title bar text</param>
+        public static void PrintMenuHeader(string title)
         {
             Console.Clear();
-            Console.WriteLine("Welcome to the Tool Library");
-            Console.WriteLine(menuTitle.PadSides(WIDTH, ' '));
-            Console.WriteLine(new String('=', WIDTH));
+            Console.WriteLine($"Welcome to the Tool Library\n" +
+                $"{title.Pad(' ')}\n" +
+                $"{'-'.Mul(WIDTH)}\n");
         }
 
-        public static void KeyWait(string message = "Press [Any Key] to continue...")
+        public static void PrintMenuSubHeader(string title)
         {
-            Console.WriteLine(message);
+            Console.WriteLine(
+                $"\n{title.Pad(' ')}\n" +
+                $"{'-'.Mul(WIDTH)}");
+        }
+
+
+        /// <summary>
+        /// Prints some message and waits for any key input before continuing.
+        /// </summary>
+        /// <param name="message"></param>
+        public static void KeyWait(string message = "")
+        {
+            Console.WriteLine($"\n{message}\nPress [Any Key] to continue...");
             Console.ReadKey();
         }
 
         /// <summary>
         /// Similar to Console.ReadLine() except adds Escape clause, string length bounds and masking capabilities. Returns true on successful input.
         /// </summary>
-        /// <param name="input">Reference string to store output string.</param>
+        /// <param name="value">Reference string to store output string.</param>
         /// <param name="minLength">Minimum submission length</param>
         /// <param name="maxLength">Maximum submission length</param>
         /// <param name="showInput">Show or mask user input (mask for password entry)</param>
         /// <param name="flags"><see cref="InputFlags"/> that determine allowable characters within the input field.</param>
         /// <returns>Returns <c>True</c> if entry input passes constraints on <see cref="ConsoleKey.Enter"/>. <c>False</c> if entry cancelled.</returns>
-        public static bool ReadInput(out string input, int minLength = 0, int maxLength = int.MaxValue, InputFlags flags = InputFlags.AllowAll, bool showInput = true)
+        public static bool ReadInput(string question, out string value, int minLength = 0, int maxLength = int.MaxValue, InputFlags flags = InputFlags.AllowAll, bool showInput = true)
         {
-            input = "";
+            value = "";
+            Console.Write(question);
             while (true)
             {
                 ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+                ConsoleKey key = keyInfo.Key;
+                char keyChar = keyInfo.KeyChar;
 
-                switch (keyInfo.Key)
+                switch (key)
                 {
                     case ConsoleKey.Escape:
-                        Console.WriteLine("");
+                        Console.WriteLine();
                         return false;
-                    case ConsoleKey.Enter when minLength <= input.Length && input.Length <= maxLength:
-                        Console.WriteLine("");
+                    case ConsoleKey.Enter when minLength <= value.Length && value.Length <= maxLength:
+                        Console.WriteLine();
                         return true;
-                    case ConsoleKey.Backspace when input.Length > 0:
-                        if (showInput) Console.Write("\b \b"); 
-                        input = input[0..^1];
+                    case ConsoleKey.Backspace when value.Length > 0:
+                        if (showInput) Console.Write("\b \b"); // Backspace console letters
+                        value = value[0..^1];
                         break;
                     default:
-                        if ((flags.HasFlag(InputFlags.Alpha) && char.IsLetter(keyInfo.KeyChar)) ||
-                            (flags.HasFlag(InputFlags.Numbers) && char.IsNumber(keyInfo.KeyChar)) ||
-                            (flags.HasFlag(InputFlags.Symbols) && char.IsSymbol(keyInfo.KeyChar)) ||
-                            (flags.HasFlag(InputFlags.WhiteSpace) && keyInfo.KeyChar == ' ') || // No tabs!
-                            (flags.HasFlag(InputFlags.Punctuation) && char.IsPunctuation(keyInfo.KeyChar)))
+                        if ((flags.HasFlag(InputFlags.Alpha) && char.IsLetter(keyChar)) ||
+                            (flags.HasFlag(InputFlags.Numbers) && char.IsNumber(keyChar)) ||
+                            (flags.HasFlag(InputFlags.Symbols) && char.IsSymbol(keyChar)) ||
+                            (flags.HasFlag(InputFlags.WhiteSpace) && keyChar == ' ') || // No tabs!
+                            (flags.HasFlag(InputFlags.Punctuation) && char.IsPunctuation(keyChar)))
                         {
-                            if (input.Length <= maxLength)
+                            if (value.Length < maxLength)
                             {
-                                if (showInput)
-                                    Console.Write(keyInfo.KeyChar);
-                                else
-                                    Console.Write("*");
-                                input += keyInfo.KeyChar;
+                                Console.Write(showInput ? keyChar : '*');
+                                value += keyChar;
                             }
                         }
                         break;

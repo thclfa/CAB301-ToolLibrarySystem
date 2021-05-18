@@ -6,44 +6,23 @@ namespace CAB301_ToolLibrarySystem
 {
     public class BTreeNode
     {
-        private Member item; // value
-        private BTreeNode lchild; // reference to its left child 
-        private BTreeNode rchild; // reference to its right child
-
         public BTreeNode(Member item)
         {
-            this.item = item;
-            lchild = null;
-            rchild = null;
+            Item = item;
+            LChild = null;
+            RChild = null;
         }
 
-        public Member Item
-        {
-            get { return item; }
-            set { item = value; }
-        }
-
-        public BTreeNode LChild
-        {
-            get { return lchild; }
-            set { lchild = value; }
-        }
-
-        public BTreeNode RChild
-        {
-            get { return rchild; }
-            set { rchild = value; }
-        }
+        public Member Item { get; set; }
+        public BTreeNode LChild { get; set; }
+        public BTreeNode RChild { get; set; }
     }
 
     public class BSTree
     {
         private BTreeNode root;
 
-        public BSTree()
-        {
-            root = null;
-        }
+        public BSTree() => root = null;
 
         public bool IsEmpty() => root == null;
         public bool Search(Member item) => Search(item, root);
@@ -51,10 +30,11 @@ namespace CAB301_ToolLibrarySystem
         {
             if (r != null)
             {
-                if (item.CompareTo(r.Item) == 0)
+                int dir = item.CompareTo(r.Item);
+
+                if (dir == 0)
                     return true;
-                else
-                    if (item.CompareTo(r.Item) < 0)
+                else if (dir < 0)
                     return Search(item, r.LChild);
                 else
                     return Search(item, r.RChild);
@@ -66,46 +46,51 @@ namespace CAB301_ToolLibrarySystem
         public int Count() => Count(root);
         private int Count(BTreeNode r)
         {
-            if (r == null)
-                return 0;
-            else
+            if (r != null)
                 return 1 + Count(r.LChild) + Count(r.RChild);
+            else
+                return 0;
         }
 
         public BTreeNode GetNode(Member item) => GetNode(item, root);
-        private BTreeNode GetNode(Member item, BTreeNode r)
+        private BTreeNode GetNode(Member item, BTreeNode ptr)
         {
-            if (r != null)
+            if (ptr != null)
             {
-                if (item.CompareTo(r.Item) == 0)
-                    return r;
+                if (item.CompareTo(ptr.Item) == 0)
+                    return ptr;
                 else
-                    if (item.CompareTo(r.Item) < 0)
-                    return GetNode(item, r.LChild);
+                    if (item.CompareTo(ptr.Item) < 0)
+                    return GetNode(item, ptr.LChild);
                 else
-                    return GetNode(item, r.RChild);
+                    return GetNode(item, ptr.RChild);
             }
             else
                 return null;
         }
 
+        /// <summary>
+        /// Returns BSTree as an ordered array
+        /// </summary>
+        /// <returns>In Order Member array sorted alphabetically by 'LastName' then 'Firstname'</returns>
         public Member[] ToArray()
         {
+            int i = 0;  // Reference index, increased by 1 after every node is added
             Member[] arr = new Member[Count()];
-            ToArray(ref arr, root, 0);
+
+            ToArray(root, ref i, ref arr);
 
             return arr;
         }
-        private void ToArray(ref Member[] arr, BTreeNode r, int i)
+        private void ToArray(BTreeNode ptr, ref int i, ref Member[] arr)
         {
-            if (r == null)
-                return;
-
-            arr[i] = r.Item;
-            i++;
-
-            ToArray(ref arr, r.LChild, i);
-            ToArray(ref arr, r.RChild, i);
+            if (ptr != null)
+            {
+                // Left side of tree is less than, so index it before adding parent to tree
+                ToArray(ptr.LChild, ref i, ref arr);
+                arr[i++] = ptr.Item;
+                ToArray(ptr.RChild, ref i, ref arr);
+            }
         }
 
         public void Insert(Member item)

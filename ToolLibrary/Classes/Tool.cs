@@ -50,10 +50,7 @@ namespace CAB301_ToolLibrarySystem
 
         public override string ToString()
         {
-            return string.Format("{0}{1}{2}", 
-                Name.PadRight(40), 
-                AvailableQuantity.ToString().PadSides(10), 
-                Quantity.ToString().PadSides(10));
+            return $"{Name,-45}{AvailableQuantity,15}{Quantity,15}";
         }
 
         public int CompareTo(Tool other)
