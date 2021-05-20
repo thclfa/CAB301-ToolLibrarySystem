@@ -50,7 +50,7 @@ namespace CAB301_ToolLibrarySystem
 
         public override string ToString()
         {
-            return $"{Name,-45}{AvailableQuantity,15}{Quantity,15}";
+            return $"{Name,-45}{AvailableQuantity,15}{Quantity,15}{NoBorrowings,15}";
         }
 
         public int CompareTo(Tool other)

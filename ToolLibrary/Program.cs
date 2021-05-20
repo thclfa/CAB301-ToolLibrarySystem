@@ -32,9 +32,9 @@ namespace CAB301_ToolLibrarySystem
 
             LibrarySystem = new ToolLibrarySystem(ref Members, ref ToolCollections);
 
-            RunUnitTests(); // Perform unit testing to validate the implementation
-            //InsertTestData(); // Insert some test data into the ToolLibrarySystem for manual testing
-            //MainMenu(); // Main Console entry point
+            //RunUnitTests(); // Perform unit testing to validate the implementation
+            InsertTestData(); // Insert some test data into the ToolLibrarySystem for manual testing
+            MainMenu(); // Main Console entry point
         }
 
         /// <summary>
@@ -203,13 +203,14 @@ namespace CAB301_ToolLibrarySystem
                 {
                     ToolCollection collection = ToolCollections[category][toolType];
                     Tool[] tools = collection.toArray();
-
+                    
                     Console.WriteLine($"\n" +
                         $"{" ",7}" +
                         $"{"Tool Name",-45}" +
                         $"{"Available Qty",15}" +
                         $"{"Total Qty",15}" +
-                        $"\n{new string('-', ConsoleLib.WIDTH)}");
+                        $"{"No Borrowings",15}" +
+                        $"\n{'-'.Mul(Console.WindowWidth)}");
 
                     if (ConsoleLib.SelectFromArray(out tool, tools))
                         return true;
@@ -220,27 +221,19 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// Returns the ToolCollection a Tool belongs to
-        /// </summary>
-        /// <param name="name">Name of the tool</param>
-        /// <returns></returns>
-        public static ToolCollection GetCollection(string name)
-        {
-            return ToolCollections.Values
-                .SelectMany(category => category.Values)
-                .Where(collection => collection.toArray().Any(tool => tool.Name.Equals(name)))
-                .FirstOrDefault();
-        }
-
-        /// <summary>
         /// Returns a Tool object by name
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
+        /// <param name="name">Name of tool to locate</param>
+        /// <returns>Returns a tool if found or null</returns>
         static Tool GetTool(string name)
         {
             try {
-                return GetCollection(name)?.toArray().Where(t => t.Name.Equals(name)).First();
+                ToolCollection collection = ToolCollections.Values
+                    .SelectMany(category => category.Values)
+                    .Where(collection => collection.toArray().Any(tool => tool.Name.Equals(name)))
+                    .FirstOrDefault();
+
+                return collection?.toArray().Where(t => t.Name.Equals(name)).First();
             } catch(Exception e) {
                 return null;
             }
@@ -282,6 +275,9 @@ namespace CAB301_ToolLibrarySystem
             }
         }
 
+        /// <summary>
+        /// 'Staff Login' entry point
+        /// </summary>
         static void StaffLogin()
         {
             ConsoleLib.PrintMenuHeader("Staff Login");
@@ -295,6 +291,9 @@ namespace CAB301_ToolLibrarySystem
                 }
         }
 
+        /// <summary>
+        /// 'Member Login' entry point
+        /// </summary>
         static void MemberLogin()
         {
             ConsoleLib.PrintMenuHeader("Member Login");
@@ -400,7 +399,7 @@ namespace CAB301_ToolLibrarySystem
         }
 
         /// <summary>
-        /// 'Member Menu' GUI entry point.
+        /// 'Member Menu' entry point.
         /// </summary>
         /// <param name="loggedInMember">Member logged in as</param>
         static void MemberMenu(Member loggedInMember)
@@ -448,7 +447,10 @@ namespace CAB301_ToolLibrarySystem
                     
 
                 if (ConsoleSelectTool(out Tool tool))
+                {
                     LibrarySystem.borrowTool(loggedInMember, tool);
+                    ConsoleLib.KeyWait($"{tool.Name} has been borrowed. You now have {loggedInMember.Tools.Length} tools borrowed.");
+                }
             }
 
             void ReturnTool()
@@ -460,6 +462,7 @@ namespace CAB301_ToolLibrarySystem
 
                 Tool tool = GetTool(toolName);
                 LibrarySystem.returnTool(loggedInMember, tool);
+                ConsoleLib.KeyWait($"{tool.Name} has been returned. You now have {loggedInMember.Tools.Length} tools borrowed.");
             }
 
             void ListMyRentedTools()

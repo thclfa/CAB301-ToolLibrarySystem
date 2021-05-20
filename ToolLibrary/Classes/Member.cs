@@ -25,7 +25,7 @@ namespace CAB301_ToolLibrarySystem
         public string LastName { get => lastName; set => lastName = value; }
         public string ContactNumber { get => contactNumber; set => contactNumber = value; }
         public string PIN { get => pin; set => pin = value; }
-        public string[] Tools => tools.toArray().WhereNotNull().Select(t => t.Name).ToArray();
+        public string[] Tools => tools.toArray()?.Select(t => t.Name).ToArray();
 
         public void addTool(Tool aTool)
         {

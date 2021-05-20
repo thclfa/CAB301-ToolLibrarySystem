@@ -16,8 +16,6 @@ namespace CAB301_ToolLibrarySystem
             collection[Number - 1] = aTool;
         }
 
-        public Tool this[int i] => collection[i];
-
         public void delete(Tool aTool)
         {
             // Get index of tool
@@ -33,7 +31,7 @@ namespace CAB301_ToolLibrarySystem
                 for (; i < Number - 1; i++)
                     collection[i] = collection[i + 1];
 
-                // Resize to remove right-most null entry
+                // Resize to remove right-most entry
                 Array.Resize(ref collection, Number - 1); 
             }
         }

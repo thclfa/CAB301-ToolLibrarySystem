@@ -17,7 +17,11 @@ namespace CAB301_ToolLibrarySystem
             this.ToolCollections = toolCollections;
         }
 
-        /// PRIVATE METHODS
+        /// <summary>
+        /// Use Console input to select a tool collection
+        /// </summary>
+        /// <param name="collection">Collection selected</param>
+        /// <returns>Returns True if selection successful, false if input cancelled</returns>
         private bool ConsoleSelectCollection(out ToolCollection collection)
         {
             if (ConsoleLib.SelectToolCategory(out string category))
@@ -31,6 +35,15 @@ namespace CAB301_ToolLibrarySystem
             return false;
         }
 
+        /// <summary>
+        /// Flattens the tool collection for linear iteration
+        /// </summary>
+        /// <returns>Flattened tool array</returns>
+        private Tool[] flattenTools()
+        {
+            return ToolCollections.Values.SelectMany(s => s.Values.SelectMany(c => c.toArray())).ToArray();
+        }
+
         /// INTERFACE METHODS
         public void add(Tool aTool)
         {
@@ -41,6 +54,9 @@ namespace CAB301_ToolLibrarySystem
                     add(aTool, 1);
                 else
                     collection.add(aTool);
+
+                displayTools(collection);
+                ConsoleLib.KeyWait($"An {aTool.Name} has been added to the collection.");
             }
         }
 
@@ -55,7 +71,6 @@ namespace CAB301_ToolLibrarySystem
             if (aTool.GetBorrowers.Number > 0)
                 return;
 
-            // Find the collection this tool resides in
             ToolCollection collection = ToolCollections.Values
                 .SelectMany(category => category.Values)
                 .Where(collection => collection.toArray().Any(tool => tool == aTool))
@@ -123,13 +138,20 @@ namespace CAB301_ToolLibrarySystem
             string[] split = aToolType.Split("/");
             string collection = split[0];
             string toolType = split[1];
-            Tool[] tools = ToolCollections[collection][toolType].toArray();
+
+            displayTools(ToolCollections[collection][toolType]);
+        }
+
+        private void displayTools(ToolCollection collection)
+        {
+            Tool[] tools = collection.toArray();
 
             Console.WriteLine($"\n" +
                 $"{" ",7}" +
                 $"{"Tool Name",-45}" +
                 $"{"Available Qty",15}" +
                 $"{"Total Qty",15}" +
+                $"{"No Borrowings",15}" +
                 $"\n{'-'.Mul(Console.WindowWidth)}");
 
             for (int i = 0; i < tools.Length; i++)
@@ -137,13 +159,11 @@ namespace CAB301_ToolLibrarySystem
                 if (tools[i] != null)
                     Console.WriteLine($"{i + 1,5}. {tools[i]}");
             }
-
         }
 
         public void displayTopThree()
         {
-            Tool[] flattened = ToolCollections.Values.SelectMany(s => s.Values.SelectMany(c => c.toArray())).ToArray();
-            Tool[] sorted = flattened.MergeSort(t => t.NoBorrowings);
+            Tool[] sorted = flattenTools().MergeSort(t => t.NoBorrowings);
             Array.Reverse(sorted);
 
             for (int i = 0; i < Math.Min(3, sorted.Length); i++)
