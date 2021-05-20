@@ -9,112 +9,27 @@ namespace CAB301_ToolLibrarySystem
 {
     public class Program
     {
-        static ToolLibrarySystem LibrarySystem;
-        static MemberCollection Members;
-        static Dictionary<string, Dictionary<string, ToolCollection>> ToolCollections;
+        private static ToolLibrarySystem LibrarySystem;
+        private static MemberCollection Members;
+        private static Dictionary<string, Dictionary<string, ToolCollection>> ToolCollections;
 
         static void Main(string[] args)
         {
             Members = new MemberCollection();
-            ToolCollections = new Dictionary<string, Dictionary<string, ToolCollection>>
-            {
-                {
-                    "Gardening Tools", new Dictionary<string, ToolCollection>()
-                    {
+            ToolCollections = new Dictionary<string, Dictionary<string, ToolCollection>>();
 
-                        { "Line Trimmers", new ToolCollection() },
-                        { "Lawn Mowers", new ToolCollection() },
-                        { "Hand Tools", new ToolCollection() },
-                        { "Wheelbarrows", new ToolCollection() },
-                        { "Garden Power Tools", new ToolCollection() },
-                    }
-                },
-                {
-                    "Flooring Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Scrapers", new ToolCollection() },
-                        { "Floor Lasers", new ToolCollection() },
-                        { "Floor Levelling Tools", new ToolCollection() },
-                        { "Floor Levelling Materials", new ToolCollection() },
-                        { "Floor Hand Tools", new ToolCollection() },
-                        { "Tiling Tools", new ToolCollection() },
-                    }
-                },
-                {
-                    "Fencing Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Hand Tools", new ToolCollection() },
-                        { "Electric Fencing", new ToolCollection() },
-                        { "Steel Fencing Tools", new ToolCollection() },
-                        { "Power Tools", new ToolCollection() },
-                        { "Fencing Accessories", new ToolCollection() },
-                    }
-                },
-                {
-                    "Measuring Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Distance Tools", new ToolCollection() },
-                        { "Laser Measurer", new ToolCollection() },
-                        { "Measuring Jugs", new ToolCollection() },
-                        { "Temperature & Humidity Tools", new ToolCollection() },
-                        { "Levelling Tools", new ToolCollection() },
-                        { "Markers", new ToolCollection() },
-                    }
-                },
-                {
-                    "Cleaning Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Draining Tools", new ToolCollection() },
-                        { "Car Cleaning", new ToolCollection() },
-                        { "Vacuum", new ToolCollection() },
-                        { "Pressure Cleaners", new ToolCollection() },
-                        { "Pool Cleaning", new ToolCollection() },
-                        { "Floor Cleaning", new ToolCollection() },
-                    }
-                },
-                {
-                    "Painting Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Sanding Tools", new ToolCollection() },
-                        { "Brushes", new ToolCollection() },
-                        { "Rollers", new ToolCollection() },
-                        { "Paint Removal Tools", new ToolCollection() },
-                        { "Paint Scrapers", new ToolCollection() },
-                        { "Sprayers", new ToolCollection() },
-                    }
-                },
-                {
-                    "Electronic Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Voltage Tester", new ToolCollection() },
-                        { "Oscilloscopes", new ToolCollection() },
-                        { "Thermal Imaging", new ToolCollection() },
-                        { "Data Test Tool", new ToolCollection() },
-                        { "Insulation Testers", new ToolCollection() },
-                    }
-                },
-                {
-                    "Electricity Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Test Equipment", new ToolCollection() },
-                        { "Safety Equipment", new ToolCollection() },
-                        { "Basic Hand Tools", new ToolCollection() },
-                        { "Circuit Protection", new ToolCollection() },
-                        { "Cable Tools", new ToolCollection() },
-                    }
-                },
-                {
-                    "Automotive Tools", new Dictionary<string, ToolCollection>()
-                    {
-                        { "Jacks", new ToolCollection() },
-                        { "Air Compressors", new ToolCollection() },
-                        { "Battery Chargers", new ToolCollection() },
-                        { "Socket Tools", new ToolCollection() },
-                        { "Braking", new ToolCollection() },
-                        { "Drive train", new ToolCollection() },
-                    }
-                }
-            };
+            // Populate ToolCollections
+            foreach( KeyValuePair<string, string[]> category in ConsoleLib.Tools)
+            {
+                var collection = new Dictionary<string, ToolCollection>();
+
+                foreach (string toolType in category.Value)
+                    collection.Add(toolType, new ToolCollection());
+
+                ToolCollections.Add(category.Key, collection);
+            }
+
+
             LibrarySystem = new ToolLibrarySystem(ref Members, ref ToolCollections);
 
             RunUnitTests(); // Perform unit testing to validate the implementation
@@ -239,18 +154,18 @@ namespace CAB301_ToolLibrarySystem
             LibrarySystem.delete(tool);
             UnitTest(tool, x => GetTool(toolName) == null, $"Delete the Tool '{toolName}'", $"'{toolName}' no longer exists");
 
-            Console.WriteLine("Counting Sort Test");
+            Console.WriteLine("Merge Sort Test");
 
-            // Test Counting Sort
-            int[] testSort = new int[] { 50, 30, 20, 45, 10, 1 };
-            int[] sorted = testSort.CountingSort();
-            int[] expected = new int[] { 1, 10, 20, 30, 45, 50 };
+            // Test Merge Sort
+            int[] testSort = new int[] { 50, 30, 20, 45, 10, 1, 5 };
+            int[] sorted = testSort.MergeSort();
+            int[] expected = new int[] { 1, 5, 10, 20, 30, 45, 50 };
             UnitTest(sorted, x => x.SequenceEqual(expected), $"Sort array [{string.Join(',', testSort)}]", $"Sorted array [{string.Join(',', expected)}]");
 
             // PRINT RESULT
             int passCount = tests.Where(x => x == true).Count();
             int testCount = tests.Count();
-            Console.WriteLine($"\n\nPassed {passCount} of {testCount} tests...");
+            Console.WriteLine($"\nPassed {passCount} of {testCount} tests...");
             Console.ReadKey();
         }
 

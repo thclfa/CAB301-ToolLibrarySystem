@@ -9,6 +9,7 @@ namespace CAB301_ToolLibrarySystem
         private Dictionary<string, Dictionary<string, ToolCollection>> ToolCollections;
         private MemberCollection Members;
 
+
         /// CONSTRUCTOR SORCERY
         public ToolLibrarySystem(ref MemberCollection members, ref Dictionary<string, Dictionary<string, ToolCollection>> toolCollections) 
         {
@@ -28,14 +29,6 @@ namespace CAB301_ToolLibrarySystem
 
             collection = null;
             return false;
-        }
-
-        private ToolCollection GetCollection(Tool aTool)
-        {
-            return ToolCollections.Values
-                .SelectMany(category => category.Values)
-                .Where(collection => collection.toArray().Any(tool => tool == aTool))
-                .FirstOrDefault();
         }
 
         /// INTERFACE METHODS
@@ -62,7 +55,11 @@ namespace CAB301_ToolLibrarySystem
             if (aTool.GetBorrowers.Number > 0)
                 return;
 
-            ToolCollection collection = GetCollection(aTool);
+            // Find the collection this tool resides in
+            ToolCollection collection = ToolCollections.Values
+                .SelectMany(category => category.Values)
+                .Where(collection => collection.toArray().Any(tool => tool == aTool))
+                .FirstOrDefault();
 
             collection.delete(aTool);
         }
@@ -146,7 +143,7 @@ namespace CAB301_ToolLibrarySystem
         public void displayTopThree()
         {
             Tool[] flattened = ToolCollections.Values.SelectMany(s => s.Values.SelectMany(c => c.toArray())).ToArray();
-            Tool[] sorted = flattened.CountingSort(t => t.NoBorrowings);
+            Tool[] sorted = flattened.MergeSort(t => t.NoBorrowings);
             Array.Reverse(sorted);
 
             for (int i = 0; i < Math.Min(3, sorted.Length); i++)

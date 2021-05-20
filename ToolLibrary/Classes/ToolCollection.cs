@@ -16,6 +16,8 @@ namespace CAB301_ToolLibrarySystem
             collection[Number - 1] = aTool;
         }
 
+        public Tool this[int i] => collection[i];
+
         public void delete(Tool aTool)
         {
             // Get index of tool

@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace CAB301_ToolLibrarySystem
 {
+    /// <summary>
+    /// Contains numerous extension methods including sorting algorithms
+    /// </summary>
     public static class ExtensionMethods
     {
         /// <summary>
@@ -82,7 +85,7 @@ namespace CAB301_ToolLibrarySystem
                 else if (v > max) max = v;
 
             int k = max - min + 1;
-            int[] counts = new int[k];  
+            int[] counts = new int[k];
 
             // Get Counts for each instance of A[i], O(n)
             foreach (T x in array)
@@ -104,6 +107,87 @@ namespace CAB301_ToolLibrarySystem
             }
 
             // O(n) + O(n) + O(n) + O(k) = O(n + k)
+            return result;
+        }
+
+        /// <summary>
+        /// O(n log n) style divide and conquer sorting algorithm
+        /// </summary>
+        /// <param name="array">Integer Array to be sorted</param>
+        /// <returns>Returns sorted instance of array</returns>
+        public static int[] MergeSort(this int[] array)
+        {
+            return MergeSort(array, x => (int)(object)x);
+        }
+
+        /// <summary>
+        /// O(n log n) style divide and conquer sorting algorithm
+        /// </summary>
+        /// <typeparam name="T">Typeof array to be sorted</typeparam>
+        /// <param name="array">Array to be sorted</param>
+        /// <param name="func">Some integer delegate to order by</param>
+        /// <returns>Returns sorted instance of array</returns>
+        public static T[] MergeSort<T>(this T[] array, Func<T, int> func)
+        {
+            /* Time complexity:
+             *  Best Case:  O(n log n)
+             *  Worst Case: O(n log n)
+	         * Space complexity: O(n)
+             */
+
+            // Return array if it's a scalar
+            if (array.Length <= 1)
+                return array;
+
+            // Get midpoint of array
+            int n = array.Length;
+            int m = n / 2;
+
+            // Division stage of O(log_2 n)
+            // Range ('..') notation is new to c# 8.0
+            T[] L = MergeSort(array[0..m], func);
+            T[] R = MergeSort(array[m..n], func);
+
+            // Merge stage of O(n)
+            return Merge(L, R, func);
+        }
+
+        /// <summary>
+        /// Merges two arrays together in ascending order by result of supplied integer delegate
+        /// </summary>
+        /// <typeparam name="T">Type of array to be merged</typeparam>
+        /// <param name="L">Left array of objects</param>
+        /// <param name="R">Right array of objects</param>
+        /// <param name="func">Some integer delegate to order by</param>
+        /// <returns>Returns an ordered array merged from L and R</returns>
+        private static T[] Merge<T>(T[] L, T[] R, Func<T, int> func)
+        {
+            /* Time complexity:
+             *  Best Case:  O(n)
+             *  Worst Case: O(n)
+             * Space complexity: O(n)
+             */
+            T[] result = new T[L.Length + R.Length];
+            int l = 0; // Left index
+            int r = 0; // Right index
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                // While indexes are within range, do comparisons
+                if (l < L.Length && r < R.Length)
+                {
+                    if (func(L[l]) <= func(R[r]))
+                        result[i] = L[l++];
+                    else
+                        result[i] = R[r++];
+                }
+                // Indexes are no longer in range, no comparisons needed
+                else if (l < L.Length)
+                    result[i] = L[l++];
+                else
+                    result[i] = R[r++];
+            }
+
             return result;
         }
     }
