@@ -51,8 +51,10 @@ namespace CAB301_ToolLibrarySystem
             {
                 // If the tool already exists, just add 1 quantity
                 if (collection.search(aTool))
-                    add(aTool, 1);
-                else
+                {
+                    Tool tool = collection.toArray().Where(x => x.Name == aTool.Name).First();
+                    add(tool, 1);
+                }else
                     collection.add(aTool);
 
                 displayTools(collection);
@@ -116,6 +118,7 @@ namespace CAB301_ToolLibrarySystem
                 return;
 
             aMember.deleteTool(aTool);
+            aTool.AvailableQuantity++;
 
             // The member may still have another instance of this tool
             if (!aMember.Tools.Contains(aTool.Name))
@@ -127,10 +130,11 @@ namespace CAB301_ToolLibrarySystem
             Console.WriteLine($"{aMember.FirstName} {aMember.LastName}'s Borrowed Tools".Pad(' '));
             Console.WriteLine(new string('-', ConsoleLib.WIDTH));
 
-            for (int i = 0; i < aMember.Tools.Length; i++)
-            {
-                Console.WriteLine($"{i + 1,5}. {aMember.Tools[i]}");
-            }
+            if (aMember.Tools.Length > 0)
+                for (int i = 0; i < aMember.Tools.Length; i++)
+                    Console.WriteLine($"{i + 1,5}. {aMember.Tools[i]}");
+            else
+                Console.WriteLine($"{aMember.FirstName} {aMember.LastName} is not currently borrowing any tools.");
         }
 
         public void displayTools(string aToolType)
@@ -163,7 +167,7 @@ namespace CAB301_ToolLibrarySystem
 
         public void displayTopThree()
         {
-            Tool[] sorted = flattenTools().MergeSort(t => t.NoBorrowings);
+            Tool[] sorted = flattenTools().CountingSort(t => t.NoBorrowings);
             Array.Reverse(sorted);
 
             for (int i = 0; i < Math.Min(3, sorted.Length); i++)

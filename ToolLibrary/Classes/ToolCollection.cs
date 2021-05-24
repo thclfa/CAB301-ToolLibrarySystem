@@ -38,7 +38,13 @@ namespace CAB301_ToolLibrarySystem
 
         public bool search(Tool aTool)
         {
-            return Array.IndexOf(collection, aTool) > -1;
+            foreach (Tool tool in collection)
+            {
+                if (aTool.Name.Equals(tool.Name))
+                    return true;
+            }
+
+            return false;
         }
 
         public Tool[] toArray()

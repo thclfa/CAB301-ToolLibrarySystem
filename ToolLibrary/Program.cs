@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace CAB301_ToolLibrarySystem
 {
@@ -19,7 +16,7 @@ namespace CAB301_ToolLibrarySystem
             ToolCollections = new Dictionary<string, Dictionary<string, ToolCollection>>();
 
             // Populate ToolCollections
-            foreach( KeyValuePair<string, string[]> category in ConsoleLib.Tools)
+            foreach (KeyValuePair<string, string[]> category in ConsoleLib.Tools)
             {
                 var collection = new Dictionary<string, ToolCollection>();
 
@@ -29,228 +26,9 @@ namespace CAB301_ToolLibrarySystem
                 ToolCollections.Add(category.Key, collection);
             }
 
-
             LibrarySystem = new ToolLibrarySystem(ref Members, ref ToolCollections);
-
-            //RunUnitTests(); // Perform unit testing to validate the implementation
-            InsertTestData(); // Insert some test data into the ToolLibrarySystem for manual testing
+           
             MainMenu(); // Main Console entry point
-        }
-
-        /// <summary>
-        /// Runs Unit tests on all functionality of the ToolLibrarySystem, not included in the 
-        /// main program, for debug purposes only.
-        /// </summary>
-        static void RunUnitTests()
-        {
-            // Just for calculating total pass/fails
-            List<bool> tests = new List<bool>();
-
-            // This function performs individual unit tests taking some object and a predicate
-            void UnitTest<T>(T obj, Func<T, bool> predicate, string testName, string expected = "")
-            {
-                bool result = predicate.Invoke(obj);
-                tests.Add(result);
-
-                Console.Write($" {tests.Count(),-2} [");
-
-                if (result)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("PASS");
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("FAIL");
-                }
-
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine($"] {testName,-35} {expected}");
-            }
-
-            ConsoleLib.PrintMenuHeader("Running Unit Tests");
-
-            Console.WriteLine($" {"ID",-2} RESULT {"TEST NAME",-35} EXPECTED OUTCOME\n{'-'.Mul(Console.WindowWidth)}");
-
-            // Dummy tests
-            //UnitTest(10, x => x + 10 == 20, "10 + 10", "20");
-            //UnitTest(10, x => x - 10 == 20, "10 - 10", "20 (This test was designed to fail)");
-
-            Console.WriteLine("Creation Test");
-
-            // NEW MEMBER TEST
-            Member member = new Member("Joe", "Blogs", "0412345678", "1234");
-            LibrarySystem.add(member);
-            string username = member.FirstName + member.LastName;
-            string fullName = member.FirstName + " " + member.LastName;
-            UnitTest(member, x => GetMember(username) != null, $"Add new Member '{fullName}'", $"'{fullName}' has been created.");
-
-            // NEW TOOL TEST
-            Tool tool = new Tool("Hand Saw", 0);
-            string toolName = tool.Name;
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(tool);
-            UnitTest(tool, x => GetTool(toolName) != null, $"Add new Tool '{toolName}'", $"'{toolName}' has been created.");
-
-            Console.WriteLine("Unsafe Borrow Test");
-
-            // Unsafe Borrow Tool Test
-            LibrarySystem.borrowTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 0 && tool.GetBorrowers.toArray().Length == 0, $"Try Borrow '{toolName}'", $"'{toolName}' not borrowed as there is 0x Quantity");
-
-            Console.WriteLine("Quantity Test");
-
-            // Quantity Add Test
-            LibrarySystem.add(tool, 20);
-            UnitTest(tool, x => x.Quantity == 20, $"Add 20x of '{toolName}'", $"'{toolName}' Quantity is 20");
-            // Quantity Remove Test
-            LibrarySystem.delete(tool, 10);
-            UnitTest(tool, x => x.Quantity == 10, $"Del 10x of '{toolName}'", $"'{toolName}' Quantity is 10");
-
-            Console.WriteLine("Safe Borrow Test");
-
-            // Safe Borrow Tool Test
-            LibrarySystem.borrowTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 1 && tool.GetBorrowers.toArray().Length == 1, $"Borrow 1st '{toolName}'", $"'{fullName}' has 1 tools and '{toolName}' has 1 borrower");
-            LibrarySystem.borrowTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 2 && tool.GetBorrowers.toArray().Length == 1, $"Borrow 2nd '{toolName}'", $"'{fullName}' has 2 tools and '{toolName}' has 1 borrower");
-            LibrarySystem.borrowTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 3 && tool.GetBorrowers.toArray().Length == 1, $"Borrow 3rd '{toolName}'", $"'{fullName}' has 3 tools and '{toolName}' has 1 borrower");
-            LibrarySystem.borrowTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 3, $"Try Borrow 4th '{toolName}'", $"'{fullName}' has 3 tools and '{toolName}' not borrowed");
-
-            Console.WriteLine("Unsafe Deletion Test");
-
-            // Quantity Remove Test
-            LibrarySystem.delete(tool, 10);
-            UnitTest(tool, x => x.Quantity == 10, $"Try Delete 10x of '{toolName}'", "Unchanged Quantity as can't delete borrowed tools");
-            // Delete Member while Borrowing
-            LibrarySystem.delete(member);
-            UnitTest(member, x => GetMember(username) == member, $"Try Delete Member '{fullName}'", $"'{fullName}' still exists as is still borrowing tools");
-            // Delete Tool while Borrowing
-            LibrarySystem.delete(tool);
-            UnitTest(tool, x => GetTool(toolName) == tool, $"Try Delete Tool '{toolName}'", $"'{toolName}' still exists as it is still being borrowed");
-
-            Console.WriteLine("Return Test");
-
-            // Member Return Tools
-            LibrarySystem.returnTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 2 && tool.GetBorrowers.toArray().Length == 1, $"Return 1st '{toolName}'", $"'{fullName}' has 2 tools and '{toolName}' has 1 borrower");
-            LibrarySystem.returnTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 1 && tool.GetBorrowers.toArray().Length == 1, $"Return 2nd '{toolName}'", $"'{fullName}' has 1 tools and '{toolName}' has 1 borrower");
-            LibrarySystem.returnTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 0 && tool.GetBorrowers.toArray().Length == 0, $"Return 3rd '{toolName}'", $"'{fullName}' has 0 tools and '{toolName}' has no borrower");
-            LibrarySystem.returnTool(member, tool);
-            UnitTest(member, x => x.Tools.Length == 0, $"Try Return 4th Tool '{toolName}'", $"No '{toolName}' to be returned.");
-
-
-            Console.WriteLine("Safe Deletion Test");
-
-            // Delete Member
-            username = member.FirstName + member.LastName;
-            LibrarySystem.delete(member);
-            UnitTest(member, x => GetMember(username) == null, $"Delete the Member '{fullName}'", $"'{fullName}' no longer exists");
-            // Delete Tool
-            LibrarySystem.delete(tool);
-            UnitTest(tool, x => GetTool(toolName) == null, $"Delete the Tool '{toolName}'", $"'{toolName}' no longer exists");
-
-            Console.WriteLine("Merge Sort Test");
-
-            // Test Merge Sort
-            int[] testSort = new int[] { 50, 30, 20, 45, 10, 1, 5 };
-            int[] sorted = testSort.MergeSort();
-            int[] expected = new int[] { 1, 5, 10, 20, 30, 45, 50 };
-            UnitTest(sorted, x => x.SequenceEqual(expected), $"Sort array [{string.Join(',', testSort)}]", $"Sorted array [{string.Join(',', expected)}]");
-
-            // PRINT RESULT
-            int passCount = tests.Where(x => x == true).Count();
-            int testCount = tests.Count();
-            Console.WriteLine($"\nPassed {passCount} of {testCount} tests...");
-            Console.ReadKey();
-        }
-
-        /// <summary>
-        /// Add some dummy data to the member/tool collections for testing purposes
-        /// </summary>
-        static void InsertTestData()
-        {
-            LibrarySystem.add(new Member("a", "a", "1234567", "1111"));
-            LibrarySystem.add(new Member("Thomas", "Fabian", "N10582835", "1234"));
-            LibrarySystem.add(new Member("Maurice", "Moss", "0118 999 88199 9119 725 3", "1234"));
-            LibrarySystem.add(new Member("Lowly", "Apprentice", "0432 384 542", "1111"));
-            LibrarySystem.add(new Member("Gone", "Fishing", "0448 123 952", "1111"));
-
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Silent Bell", 32));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Left-Handed Hammer", 4));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Spirit-Level Bubble", 2));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Sky Hooks", 50));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Skirting Board Ladder", 9));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Bucket of Steam", 10));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Glass Hammer", 10));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("A Long Weight", 1000));
-            ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Tin of Striped Paint", 15));
-        }
-
-        /// <summary>
-        /// Use Console input to traverse Category/ToolType menus to return a Tool
-        /// </summary>
-        /// <param name="tool">Tool selected</param>
-        /// <returns>Returns True if selection successful, false if input cancelled</returns>
-        static bool ConsoleSelectTool(out Tool tool)
-        {
-            if (ConsoleLib.SelectToolCategory(out string category))
-                if (ConsoleLib.SelectToolType(out string toolType, category))
-                {
-                    ToolCollection collection = ToolCollections[category][toolType];
-                    Tool[] tools = collection.toArray();
-                    
-                    Console.WriteLine($"\n" +
-                        $"{" ",7}" +
-                        $"{"Tool Name",-45}" +
-                        $"{"Available Qty",15}" +
-                        $"{"Total Qty",15}" +
-                        $"{"No Borrowings",15}" +
-                        $"\n{'-'.Mul(Console.WindowWidth)}");
-
-                    if (ConsoleLib.SelectFromArray(out tool, tools))
-                        return true;
-                }
-
-            tool = null;
-            return false;
-        }
-
-        /// <summary>
-        /// Returns a Tool object by name
-        /// </summary>
-        /// <param name="name">Name of tool to locate</param>
-        /// <returns>Returns a tool if found or null</returns>
-        static Tool GetTool(string name)
-        {
-            try {
-                ToolCollection collection = ToolCollections.Values
-                    .SelectMany(category => category.Values)
-                    .Where(collection => collection.toArray().Any(tool => tool.Name.Equals(name)))
-                    .FirstOrDefault();
-
-                return collection?.toArray().Where(t => t.Name.Equals(name)).First();
-            } catch(Exception e) {
-                return null;
-            }
-        }
-        
-        static Member GetMember(string firstName, string lastName)
-        {
-            return GetMember(firstName + lastName);
-        }
-        
-        static Member GetMember(string username)
-        {
-            try {
-                return Members.toArray().Where(m => (m.FirstName + m.LastName).Equals(username, StringComparison.OrdinalIgnoreCase)).First();
-            } catch(Exception e) {
-                return null;
-            }
         }
 
         /// <summary>
@@ -273,46 +51,43 @@ namespace CAB301_ToolLibrarySystem
                 action.Invoke();    // INVOKE SELECTED ACTION
                 MainMenu();         // RECURSIVE MENU, WHILE LOOPS CAN BE EVIL
             }
+
+
+            void StaffLogin()
+            {
+                ConsoleLib.PrintMenuHeader("Staff Login");
+
+                if (ConsoleLib.ReadInput("Enter Username: ", out string username, 0, 15, ConsoleLib.InputFlags.Alpha))
+                    if (ConsoleLib.ReadInput("Enter Password: ", out string password, 0, 15, ConsoleLib.InputFlags.Password, false))
+                    {
+                        if (username == "staff" && password == "today123")
+                            StaffMenu();
+                        else
+                            ConsoleLib.KeyWait("Login Unsuccessful. Invalid username or password.");
+                    }
+            }
+
+            void MemberLogin()
+            {
+                ConsoleLib.PrintMenuHeader("Member Login");
+
+                if (ConsoleLib.ReadInput("Enter Username: ", out string username, 0, 15, ConsoleLib.InputFlags.Alpha))
+                    if (ConsoleLib.ReadInput("Enter PIN: ", out string pin, 4, 4, ConsoleLib.InputFlags.Numbers, false))
+                    {
+                        Member member = GetMember(username);
+
+                        if (member != null)
+                            if (member.PIN == pin)
+                            {
+                                MemberMenu(member);
+                                return;
+                            }
+
+                        ConsoleLib.KeyWait("Login Unsuccessful. Invalid username or password.");
+                    }
+            }
+
         }
-
-        /// <summary>
-        /// 'Staff Login' entry point
-        /// </summary>
-        static void StaffLogin()
-        {
-            ConsoleLib.PrintMenuHeader("Staff Login");
-
-            if (ConsoleLib.ReadInput("Enter Username: ", out string username, 0, 15, ConsoleLib.InputFlags.Alpha))
-                if (ConsoleLib.ReadInput("Enter Password: ", out string password, 0, 15, ConsoleLib.InputFlags.Password)) {
-                    if (username == "staff" && password == "today123")
-                        StaffMenu();
-                    else
-                        ConsoleLib.KeyWait("Error: Invalid username or password.");
-                }
-        }
-
-        /// <summary>
-        /// 'Member Login' entry point
-        /// </summary>
-        static void MemberLogin()
-        {
-            ConsoleLib.PrintMenuHeader("Member Login");
-
-            if (ConsoleLib.ReadInput("Enter Username: ", out string username, 0, 15, ConsoleLib.InputFlags.Alpha))
-                if (ConsoleLib.ReadInput("Enter PIN: ", out string pin, 4, 4, ConsoleLib.InputFlags.Numbers))
-                {
-                    Member member = GetMember(username);
-
-                    if (member != null)
-                        if (member.PIN == pin)
-                        {
-                            MemberMenu(member);
-                            return;
-                        }
-                    
-                    ConsoleLib.KeyWait("Error: Invalid username or password.");
-                }
-        } 
 
         /// <summary>
         /// 'Staff Menu' entry point
@@ -337,6 +112,8 @@ namespace CAB301_ToolLibrarySystem
                 StaffMenu();
             }
 
+            /// SUB MENU FUNCTIONS
+
             void AddNewTool()
             {
                 // SELECT CATEGORY
@@ -352,7 +129,11 @@ namespace CAB301_ToolLibrarySystem
 
                 if (ConsoleSelectTool(out Tool tool))
                     if (ConsoleLib.ReadInput("Enter Quantity to Add: ", out string quantity, 1, flags: ConsoleLib.InputFlags.Numbers))
+                    {
                         LibrarySystem.add(tool, int.Parse(quantity));
+                        ConsoleLib.KeyWait($"{quantity} has been added to {tool.Name} for a total of {tool.Quantity}.");
+                    }
+                        
             }
 
             void RemoveFromExistingTool()
@@ -361,7 +142,10 @@ namespace CAB301_ToolLibrarySystem
 
                 if (ConsoleSelectTool(out Tool tool))
                     if (ConsoleLib.ReadInput("Enter Quantity to Remove: ", out string quantity, 1, flags: ConsoleLib.InputFlags.Numbers))
+                    {
                         LibrarySystem.delete(tool, int.Parse(quantity));
+                        ConsoleLib.KeyWait($"{quantity} has been removed from {tool.Name} and now has {tool.Quantity} left.");
+                    }
             }
 
             void RegisterNewMember()
@@ -372,7 +156,17 @@ namespace CAB301_ToolLibrarySystem
                     if (ConsoleLib.ReadInput("Enter Last Name: ", out string lastName, flags: ConsoleLib.InputFlags.Alpha))
                         if (ConsoleLib.ReadInput("Enter Contact No: ", out string contactNumber, flags: ConsoleLib.InputFlags.Numbers))
                             if (ConsoleLib.ReadInput("Enter PIN (4 Digits): ", out string pin, 4, 4, ConsoleLib.InputFlags.Numbers))
-                                LibrarySystem.add(new Member(firstName, lastName, contactNumber, pin));
+                            {
+                                Member member = new Member(firstName, lastName, contactNumber, pin);
+                                if (!Members.search(member))
+                                {
+                                    LibrarySystem.add(member);
+                                    ConsoleLib.KeyWait($"{firstName} {lastName} has been registered as a new member.");
+                                }
+                                else
+                                    ConsoleLib.KeyWait($"{firstName} {lastName} already exists!");
+                            }
+                                
             }
 
             void RemoveMember()
@@ -380,7 +174,15 @@ namespace CAB301_ToolLibrarySystem
                 ConsoleLib.PrintMenuHeader("Staff Menu - Remove existing Member");
 
                 if (ConsoleLib.SelectFromArray(out Member member, Members.toArray()))
+                {
                     LibrarySystem.delete(member);
+
+                    if (!Members.search(member))
+                        ConsoleLib.KeyWait($"{member.FirstName} {member.LastName} has been deleted.");
+                    else
+                        ConsoleLib.KeyWait($"{member.FirstName} {member.LastName} deletion unsuccessful.");
+                }
+                    
             }
 
             void FindContactNumber()
@@ -390,10 +192,12 @@ namespace CAB301_ToolLibrarySystem
                 if (ConsoleLib.ReadInput("Enter Members First Name: ", out string firstName, 1, flags: ConsoleLib.InputFlags.Alpha))
                     if (ConsoleLib.ReadInput("Enter Members Last Name: ", out string lastName, 1, flags: ConsoleLib.InputFlags.Alpha))
                     {
-                        Member member = GetMember(firstName, lastName);
+                        Member member = GetMember(firstName+lastName);
 
                         if (member != null)
                             ConsoleLib.KeyWait($"{member.FirstName} {member.LastName}'s Contact Number is {member.ContactNumber}");
+                        else
+                            ConsoleLib.KeyWait($"{member.FirstName} {member.LastName} has not been found.");
                     }
             }
         }
@@ -430,9 +234,8 @@ namespace CAB301_ToolLibrarySystem
                     {
                         ConsoleLib.PrintMenuSubHeader($"Displaying {category} - {toolType}");
                         LibrarySystem.displayTools(category + '/' + toolType);
+                        ConsoleLib.KeyWait();
                     }
-
-                ConsoleLib.KeyWait();
             }
 
             void BorrowTool()
@@ -440,16 +243,16 @@ namespace CAB301_ToolLibrarySystem
                 ConsoleLib.PrintMenuHeader("Member Menu - Borrow a Tool");
 
                 if (loggedInMember.Tools.Length >= 3)
+                    ConsoleLib.KeyWait("Error: You cannot borrow more than 3 tools. Please return one before trying again.");
+                else if (ConsoleSelectTool(out Tool tool))
                 {
-                    ConsoleLib.KeyWait("Error: You cannot borrow more than 3 tools.");
-                    return;
-                }
-                    
-
-                if (ConsoleSelectTool(out Tool tool))
-                {
-                    LibrarySystem.borrowTool(loggedInMember, tool);
-                    ConsoleLib.KeyWait($"{tool.Name} has been borrowed. You now have {loggedInMember.Tools.Length} tools borrowed.");
+                    if (tool.AvailableQuantity > 0)
+                    {
+                        LibrarySystem.borrowTool(loggedInMember, tool);
+                        ConsoleLib.KeyWait($"{tool.Name} has been borrowed. You now have {loggedInMember.Tools.Length} tools borrowed.");
+                    }
+                    else
+                        ConsoleLib.KeyWait($"{tool.Name} was not borrowed. No Available Quantity.");
                 }
             }
 
@@ -483,5 +286,96 @@ namespace CAB301_ToolLibrarySystem
                 ConsoleLib.KeyWait();
             }
         }
+
+        /// <summary>
+        /// Use Console input to traverse Category/ToolType menus to return a Tool
+        /// </summary>
+        /// <param name="tool">Tool selected</param>
+        /// <returns>Returns True if selection successful, false if input cancelled</returns>
+        static bool ConsoleSelectTool(out Tool tool)
+        {
+            if (ConsoleLib.SelectToolCategory(out string category))
+                if (ConsoleLib.SelectToolType(out string toolType, category))
+                {
+                    ToolCollection collection = ToolCollections[category][toolType];
+                    Tool[] tools = collection.toArray();
+
+                    Console.WriteLine($"\n" +
+                        $"{" ",7}" +
+                        $"{"Tool Name",-45}" +
+                        $"{"Available Qty",15}" +
+                        $"{"Total Qty",15}" +
+                        $"{"No Borrowings",15}" +
+                        $"\n{'-'.Mul(Console.WindowWidth)}");
+
+                    if (ConsoleLib.SelectFromArray(out tool, tools))
+                        return true;
+                }
+
+            tool = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Returns some tool by name from the ToolCollection
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>REturns a tool if found or null</returns>
+        static Tool GetTool(string name)
+        {
+            try
+            {
+                ToolCollection collection = ToolCollections.Values
+                    .SelectMany(category => category.Values)
+                    .Where(collection => collection.toArray().Any(tool => tool.Name.Equals(name)))
+                    .First();
+
+                return collection?.toArray().Where(t => t.Name.Equals(name)).First();
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Returns some member by username from the MemberCollection
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>Returns a member if found or null</returns>      
+        static Member GetMember(string username)
+        {
+            try
+            {
+                return Members.toArray().Where(m => (m.FirstName + m.LastName).Equals(username, StringComparison.OrdinalIgnoreCase)).First();
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+
+        ///// <summary>
+        ///// Add some dummy data to the member/tool collections for testing purposes
+        ///// </summary>
+        //static void InsertTestData()
+        //{
+        //    LibrarySystem.add(new Member("a", "a", "1234567", "1111"));
+        //    LibrarySystem.add(new Member("Thomas", "Fabian", "N10582835", "1234"));
+        //    LibrarySystem.add(new Member("Maurice", "Moss", "0118 999 88199 9119 725 3", "1234"));
+        //    LibrarySystem.add(new Member("Lowly", "Apprentice", "0432 384 542", "1111"));
+        //    LibrarySystem.add(new Member("Gone", "Fishing", "0448 123 952", "1111"));
+
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Silent Bell", 32));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Left-Handed Hammer", 4));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Spirit-Level Bubble", 2));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Sky Hooks", 50));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Skirting Board Ladder", 9));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Bucket of Steam", 10));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Glass Hammer", 10));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("A Long Weight", 1000));
+        //    ToolCollections["Gardening Tools"]["Line Trimmers"].add(new Tool("Tin of Striped Paint", 15));
+        //}
     }
 }

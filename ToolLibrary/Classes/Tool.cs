@@ -45,7 +45,6 @@ namespace CAB301_ToolLibrarySystem
                 return;
 
             members.delete(aMember);
-            AvailableQuantity++;
         }
 
         public override string ToString()

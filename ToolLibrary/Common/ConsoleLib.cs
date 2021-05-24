@@ -147,8 +147,7 @@ namespace CAB301_ToolLibrarySystem
                     }
                     else
                     {
-                        KeyWait("Error: Invalid index.");
-                        return false;
+                        KeyWait("Invalid selection, try again.");
                     }
                 }
                 else return false;
@@ -184,8 +183,7 @@ namespace CAB301_ToolLibrarySystem
                     }
                     else
                     {
-                        KeyWait("Error: Invalid index.");
-                        return false;
+                        KeyWait("Invalid selection, try again.");
                     }
                 }
                 else return false;
@@ -221,9 +219,13 @@ namespace CAB301_ToolLibrarySystem
             Console.Clear();
             Console.WriteLine($"Welcome to the Tool Library\n" +
                 $"{title.Pad(' ')}\n" +
-                $"{'-'.Mul(WIDTH)}\n");
+                $"{'='.Mul(WIDTH)}\n");
         }
 
+        /// <summary>
+        /// Prints the sub menu header with underline
+        /// </summary>
+        /// <param name="title"></param>
         public static void PrintMenuSubHeader(string title)
         {
             Console.WriteLine(
@@ -238,8 +240,44 @@ namespace CAB301_ToolLibrarySystem
         /// <param name="message"></param>
         public static void KeyWait(string message = "")
         {
-            Console.WriteLine($"\n{message}\nPress [Any Key] to continue...");
+            Console.WriteLine($"\n{message} [Any Key] to continue...");
             Console.ReadKey();
+        }
+
+        /// <summary>
+        /// Returns a new string center-aligned padded with <see cref="Console.WindowWidth"/> number of characters.
+        /// </summary>
+        /// <param name="str">String to pad</param>
+        /// <param name="paddingChar">Char to pad</param>
+        /// <returns>A new string center-aligned with some padding character on the left and right sides</returns>
+        public static string Pad(this string str, char paddingChar = ' ')
+        {
+            return str.Pad(Console.WindowWidth, paddingChar);
+        }
+
+        /// <summary>
+        /// Returns a new string center-aligned with some padding character on the left and right sides.
+        /// </summary>
+        /// <param name="str">String to pad</param>
+        /// <param name="width">Width of padding</param>
+        /// <param name="paddingChar">Char to pad</param>
+        /// <returns>A new string center-aligned with some padding character on the left and right sides</returns>
+        public static string Pad(this string str, int width, char paddingChar = ' ')
+        {
+            int padding = width - str.Length;
+            int padLeft = padding / 2 + str.Length;
+            return str.PadLeft(padLeft, paddingChar).PadRight(width, paddingChar);
+        }
+
+        /// <summary>
+        /// Multiplies a char i times to create a longer string.
+        /// </summary>
+        /// <param name="chr">char to be multiplied</param>
+        /// <param name="i">Coefficient</param>
+        /// <returns>New string of length i</returns>
+        public static string Mul(this char chr, int i)
+        {
+            return new string(chr, i);
         }
 
         /// <summary>
@@ -270,7 +308,7 @@ namespace CAB301_ToolLibrarySystem
                         Console.WriteLine();
                         return true;
                     case ConsoleKey.Backspace when value.Length > 0:
-                        if (showInput) Console.Write("\b \b"); // Backspace console letters
+                        Console.Write("\b \b"); // Backspace console letters
                         value = value[0..^1];
                         break;
                     default:
